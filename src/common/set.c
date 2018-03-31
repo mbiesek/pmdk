@@ -2146,7 +2146,7 @@ util_poolset_create_set(struct pool_set **setp, const char *path,
 	}
 
 	if (is_dev_dax || ret < POOLSET_HDR_SIG_LEN ||
-		strncmp(signature, POOLSET_HDR_SIG, POOLSET_HDR_SIG_LEN) != 0) {
+	    strncmp(signature, POOLSET_HDR_SIG, POOLSET_HDR_SIG_LEN)) {
 		LOG(4, "not a pool set header");
 		(void) os_close(fd);
 
@@ -2343,7 +2343,7 @@ util_header_check(struct pool_set *set, unsigned repidx, unsigned partidx,
 	}
 
 	/* check signature */
-	if (memcmp(hdr.signature, attr->signature, POOL_HDR_SIG_LEN) != 0) {
+	if (memcmp(hdr.signature, attr->signature, POOL_HDR_SIG_LEN)) {
 		ERR("wrong pool type: \"%.8s\"", hdr.signature);
 		errno = EINVAL;
 		return -1;
@@ -2398,7 +2398,7 @@ util_header_check(struct pool_set *set, unsigned repidx, unsigned partidx,
 
 	/* check pool set UUID */
 	if (memcmp(HDR(REP(set, 0), 0)->poolset_uuid, hdr.poolset_uuid,
-						POOL_HDR_UUID_LEN) != 0) {
+						POOL_HDR_UUID_LEN)) {
 		ERR("wrong pool set UUID");
 		errno = EINVAL;
 		return -1;
@@ -2406,9 +2406,9 @@ util_header_check(struct pool_set *set, unsigned repidx, unsigned partidx,
 
 	/* check pool set linkage */
 	if (memcmp(HDRP(rep, partidx)->uuid, hdr.prev_part_uuid,
-						POOL_HDR_UUID_LEN) != 0 ||
+						POOL_HDR_UUID_LEN) ||
 	    memcmp(HDRN(rep, partidx)->uuid, hdr.next_part_uuid,
-						POOL_HDR_UUID_LEN) != 0) {
+						POOL_HDR_UUID_LEN)) {
 		ERR("wrong part UUID");
 		errno = EINVAL;
 		return -1;
@@ -2464,8 +2464,7 @@ util_header_check_remote(struct pool_set *set, unsigned partidx)
 	util_convert2h_hdr_nocheck(&hdr);
 
 	/* valid header found */
-	if (memcmp(HDR(rep, 0)->signature, hdrp->signature,
-		POOL_HDR_SIG_LEN) != 0) {
+	if (memcmp(HDR(rep, 0)->signature, hdrp->signature, POOL_HDR_SIG_LEN)) {
 		ERR("pool signature mismatch in part %d", partidx);
 		errno = EINVAL;
 		return -1;
@@ -2516,7 +2515,7 @@ util_header_check_remote(struct pool_set *set, unsigned partidx)
 
 	/* check pool set UUID */
 	if (memcmp(HDR(rep, 0)->poolset_uuid, hdrp->poolset_uuid,
-		POOL_HDR_UUID_LEN) != 0) {
+							POOL_HDR_UUID_LEN)) {
 		ERR("wrong pool set UUID in part %d", partidx);
 		errno = EINVAL;
 		return -1;
@@ -2524,7 +2523,7 @@ util_header_check_remote(struct pool_set *set, unsigned partidx)
 
 	/* check previous replica UUID */
 	if (memcmp(HDR(rep, 0)->prev_repl_uuid, hdrp->prev_repl_uuid,
-		POOL_HDR_UUID_LEN) != 0) {
+							POOL_HDR_UUID_LEN)) {
 		ERR("wrong previous replica UUID in part %d", partidx);
 		errno = EINVAL;
 		return -1;
@@ -2532,14 +2531,14 @@ util_header_check_remote(struct pool_set *set, unsigned partidx)
 
 	/* check next replica UUID */
 	if (memcmp(HDR(rep, 0)->next_repl_uuid, hdrp->next_repl_uuid,
-		POOL_HDR_UUID_LEN) != 0) {
+						POOL_HDR_UUID_LEN)) {
 		ERR("wrong next replica UUID in part %d", partidx);
 		errno = EINVAL;
 		return -1;
 	}
 
 	if (memcmp(&HDR(rep, 0)->arch_flags, &hdrp->arch_flags,
-		sizeof(hdrp->arch_flags)) != 0) {
+						sizeof(hdrp->arch_flags))) {
 		ERR("wrong architecture flags");
 		errno = EINVAL;
 		return -1;
@@ -2547,9 +2546,9 @@ util_header_check_remote(struct pool_set *set, unsigned partidx)
 
 	/* check pool set linkage */
 	if (memcmp(HDRP(rep, partidx)->uuid, hdrp->prev_part_uuid,
-		POOL_HDR_UUID_LEN) != 0 ||
-		memcmp(HDRN(rep, partidx)->uuid, hdrp->next_part_uuid,
-		POOL_HDR_UUID_LEN) != 0) {
+							POOL_HDR_UUID_LEN) ||
+	    memcmp(HDRN(rep, partidx)->uuid, hdrp->next_part_uuid,
+							POOL_HDR_UUID_LEN)) {
 		ERR("wrong part UUID in part %d", partidx);
 		errno = EINVAL;
 		return -1;
@@ -3656,10 +3655,10 @@ util_replica_check(struct pool_set *set, const struct pool_attr *attr)
 
 		if (memcmp(HDR(REPP(set, r), 0)->uuid,
 					HDR(REP(set, r), 0)->prev_repl_uuid,
-					POOL_HDR_UUID_LEN) != 0 ||
-			memcmp(HDR(REPN(set, r), 0)->uuid,
+					POOL_HDR_UUID_LEN) ||
+		    memcmp(HDR(REPN(set, r), 0)->uuid,
 					HDR(REP(set, r), 0)->next_repl_uuid,
-					POOL_HDR_UUID_LEN) != 0) {
+					POOL_HDR_UUID_LEN)) {
 			ERR("wrong replica UUID");
 			errno = EINVAL;
 			return -1;
