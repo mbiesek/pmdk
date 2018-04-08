@@ -1779,7 +1779,7 @@ typedef
          : /*in*/    "a" (&_argvec[0]) __FRAME_POINTER                 \
          : /*trash*/ "cc", "memory", __CALLER_SAVED_REGS, "r14", "r15" \
       );                                                               \
-      lval = (__typeof__(lval)) _res;                                  \
+      (lval) = (__typeof__(lval)) _res;                                  \
    } while (0)
 
 #define CALL_FN_W_W(lval, orig, arg1)                                  \
@@ -1802,7 +1802,7 @@ typedef
          : /*in*/    "a" (&_argvec[0]) __FRAME_POINTER                 \
          : /*trash*/ "cc", "memory", __CALLER_SAVED_REGS, "r14", "r15" \
       );                                                               \
-      lval = (__typeof__(lval)) _res;                                  \
+      (lval) = (__typeof__(lval)) _res;                                  \
    } while (0)
 
 #define CALL_FN_W_WW(lval, orig, arg1,arg2)                            \
@@ -1827,7 +1827,7 @@ typedef
          : /*in*/    "a" (&_argvec[0]) __FRAME_POINTER                 \
          : /*trash*/ "cc", "memory", __CALLER_SAVED_REGS, "r14", "r15" \
       );                                                               \
-      lval = (__typeof__(lval)) _res;                                  \
+      (lval) = (__typeof__(lval)) _res;                                  \
    } while (0)
 
 #define CALL_FN_W_WWW(lval, orig, arg1,arg2,arg3)                      \
@@ -1854,7 +1854,7 @@ typedef
          : /*in*/    "a" (&_argvec[0]) __FRAME_POINTER                 \
          : /*trash*/ "cc", "memory", __CALLER_SAVED_REGS, "r14", "r15" \
       );                                                               \
-      lval = (__typeof__(lval)) _res;                                  \
+      (lval) = (__typeof__(lval)) _res;                                  \
    } while (0)
 
 #define CALL_FN_W_WWWW(lval, orig, arg1,arg2,arg3,arg4)                \
@@ -1883,7 +1883,7 @@ typedef
          : /*in*/    "a" (&_argvec[0]) __FRAME_POINTER                 \
          : /*trash*/ "cc", "memory", __CALLER_SAVED_REGS, "r14", "r15" \
       );                                                               \
-      lval = (__typeof__(lval)) _res;                                  \
+      (lval) = (__typeof__(lval)) _res;                                  \
    } while (0)
 
 #define CALL_FN_W_5W(lval, orig, arg1,arg2,arg3,arg4,arg5)             \
@@ -1914,7 +1914,7 @@ typedef
          : /*in*/    "a" (&_argvec[0]) __FRAME_POINTER                 \
          : /*trash*/ "cc", "memory", __CALLER_SAVED_REGS, "r14", "r15" \
       );                                                               \
-      lval = (__typeof__(lval)) _res;                                  \
+      (lval) = (__typeof__(lval)) _res;                                  \
    } while (0)
 
 #define CALL_FN_W_6W(lval, orig, arg1,arg2,arg3,arg4,arg5,arg6)        \
@@ -1947,7 +1947,7 @@ typedef
          : /*in*/    "a" (&_argvec[0]) __FRAME_POINTER                 \
          : /*trash*/ "cc", "memory", __CALLER_SAVED_REGS, "r14", "r15" \
       );                                                               \
-      lval = (__typeof__(lval)) _res;                                  \
+      (lval) = (__typeof__(lval)) _res;                                  \
    } while (0)
 
 #define CALL_FN_W_7W(lval, orig, arg1,arg2,arg3,arg4,arg5,arg6,        \
@@ -1983,7 +1983,7 @@ typedef
          : /*in*/    "a" (&_argvec[0]) __FRAME_POINTER                 \
          : /*trash*/ "cc", "memory", __CALLER_SAVED_REGS, "r14", "r15" \
       );                                                               \
-      lval = (__typeof__(lval)) _res;                                  \
+      (lval) = (__typeof__(lval)) _res;                                  \
    } while (0)
 
 #define CALL_FN_W_8W(lval, orig, arg1,arg2,arg3,arg4,arg5,arg6,        \
@@ -2021,7 +2021,7 @@ typedef
          : /*in*/    "a" (&_argvec[0]) __FRAME_POINTER                 \
          : /*trash*/ "cc", "memory", __CALLER_SAVED_REGS, "r14", "r15" \
       );                                                               \
-      lval = (__typeof__(lval)) _res;                                  \
+      (lval) = (__typeof__(lval)) _res;                                  \
    } while (0)
 
 #define CALL_FN_W_9W(lval, orig, arg1,arg2,arg3,arg4,arg5,arg6,        \
@@ -2061,7 +2061,7 @@ typedef
          : /*in*/    "a" (&_argvec[0]) __FRAME_POINTER                 \
          : /*trash*/ "cc", "memory", __CALLER_SAVED_REGS, "r14", "r15" \
       );                                                               \
-      lval = (__typeof__(lval)) _res;                                  \
+      (lval) = (__typeof__(lval)) _res;                                  \
    } while (0)
 
 #define CALL_FN_W_10W(lval, orig, arg1,arg2,arg3,arg4,arg5,arg6,       \
@@ -2103,7 +2103,7 @@ typedef
          : /*in*/    "a" (&_argvec[0]) __FRAME_POINTER                 \
          : /*trash*/ "cc", "memory", __CALLER_SAVED_REGS, "r14", "r15" \
       );                                                               \
-      lval = (__typeof__(lval)) _res;                                  \
+      (lval) = (__typeof__(lval)) _res;                                  \
    } while (0)
 
 #define CALL_FN_W_11W(lval, orig, arg1,arg2,arg3,arg4,arg5,arg6,       \
@@ -2147,7 +2147,7 @@ typedef
          : /*in*/    "a" (&_argvec[0]) __FRAME_POINTER                 \
          : /*trash*/ "cc", "memory", __CALLER_SAVED_REGS, "r14", "r15" \
       );                                                               \
-      lval = (__typeof__(lval)) _res;                                  \
+      (lval) = (__typeof__(lval)) _res;                                  \
    } while (0)
 
 #define CALL_FN_W_12W(lval, orig, arg1,arg2,arg3,arg4,arg5,arg6,       \
@@ -2193,7 +2193,7 @@ typedef
          : /*in*/    "a" (&_argvec[0]) __FRAME_POINTER                 \
          : /*trash*/ "cc", "memory", __CALLER_SAVED_REGS, "r14", "r15" \
       );                                                               \
-      lval = (__typeof__(lval)) _res;                                  \
+      (lval) = (__typeof__(lval)) _res;                                  \
    } while (0)
 
 #endif /* PLAT_amd64_linux || PLAT_amd64_darwin || PLAT_amd64_solaris */
