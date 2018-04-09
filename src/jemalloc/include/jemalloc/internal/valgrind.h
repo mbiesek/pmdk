@@ -31,39 +31,39 @@
  * Valgrind reports errors, there are no extra stack frames in the backtraces.
  */
 #define	JEMALLOC_VALGRIND_MALLOC(cond, ptr, usize, zero) do {		\
-	if (in_valgrind && cond)					\
+	if (in_valgrind && (cond))					\
 		VALGRIND_MALLOCLIKE_BLOCK(ptr, usize, p2rz(ptr), zero);	\
 } while (0)
 #define	JEMALLOC_VALGRIND_REALLOC(maybe_moved, ptr, usize,		\
     ptr_maybe_null, old_ptr, old_usize, old_rzsize, old_ptr_maybe_null,	\
     zero) do {								\
 	if (in_valgrind) {						\
-		if (!maybe_moved || ptr == old_ptr) {			\
+		if (!(maybe_moved) || (ptr) == (old_ptr)) {			\
 			VALGRIND_RESIZEINPLACE_BLOCK(ptr, old_usize,	\
 			    usize, p2rz(ptr));				\
-			if (zero && old_usize < usize) {		\
+			if ((zero) && (old_usize) < (usize)) {		\
 				valgrind_make_mem_defined(		\
-				    (void *)((uintptr_t)ptr +		\
-				    old_usize), usize - old_usize);	\
+				    (void *)((uintptr_t)(ptr) +		\
+				    (old_usize)), (usize) - (old_usize));	\
 			}						\
 		} else {						\
-			if (!old_ptr_maybe_null || old_ptr != NULL) {	\
+			if (!(old_ptr_maybe_null) || (old_ptr) != NULL) {	\
 				valgrind_freelike_block(old_ptr,	\
 				    old_rzsize);			\
 			}						\
-			if (!ptr_maybe_null || ptr != NULL) {		\
-				size_t copy_size = (old_usize < usize)	\
-				    ?  old_usize : usize;		\
-				size_t tail_size = usize - copy_size;	\
+			if (!(ptr_maybe_null) || (ptr) != NULL) {		\
+				size_t copy_size = ((old_usize) < (usize))	\
+				    ?  (old_usize) : (usize);		\
+				size_t tail_size = (usize) - copy_size;	\
 				VALGRIND_MALLOCLIKE_BLOCK(ptr, usize,	\
 				    p2rz(ptr), false);			\
 				if (copy_size > 0) {			\
 					valgrind_make_mem_defined(ptr,	\
 					copy_size);			\
 				}					\
-				if (zero && tail_size > 0) {		\
+				if ((zero) && tail_size > 0) {		\
 					valgrind_make_mem_defined(	\
-					    (void *)((uintptr_t)ptr +	\
+					    (void *)((uintptr_t)(ptr) +	\
 					    copy_size), tail_size);	\
 				}					\
 			}						\

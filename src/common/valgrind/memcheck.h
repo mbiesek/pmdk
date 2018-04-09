@@ -243,10 +243,10 @@ typedef
                                VG_USERREQ__COUNT_LEAKS,                  \
                                &_qzz_leaked, &_qzz_dubious,              \
                                &_qzz_reachable, &_qzz_suppressed, 0);    \
-    leaked     = _qzz_leaked;                                            \
-    dubious    = _qzz_dubious;                                           \
-    reachable  = _qzz_reachable;                                         \
-    suppressed = _qzz_suppressed;                                        \
+    (leaked)     = _qzz_leaked;                                          \
+    (dubious)    = _qzz_dubious;                                         \
+    (reachable)  = _qzz_reachable;                                       \
+    (suppressed) = _qzz_suppressed;                                      \
    }
 
 /* Return number of leaked, dubious, reachable and suppressed bytes found by
@@ -265,10 +265,10 @@ typedef
                                VG_USERREQ__COUNT_LEAK_BLOCKS,            \
                                &_qzz_leaked, &_qzz_dubious,              \
                                &_qzz_reachable, &_qzz_suppressed, 0);    \
-    leaked     = _qzz_leaked;                                            \
-    dubious    = _qzz_dubious;                                           \
-    reachable  = _qzz_reachable;                                         \
-    suppressed = _qzz_suppressed;                                        \
+    (leaked)     = _qzz_leaked;                                          \
+    (dubious)    = _qzz_dubious;                                         \
+    (reachable)  = _qzz_reachable;                                       \
+    (suppressed) = _qzz_suppressed;                                      \
    }
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017, Intel Corporation
+ * Copyright 2016-2018, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -422,7 +422,8 @@ static struct alloc_class *
 alloc_class_find_min_frag(struct alloc_class_collection *ac, size_t n)
 {
 	struct alloc_class *best_c = NULL;
-	float best_frag = FLT_MAX;
+	size_t best_frag_d = SIZE_MAX;
+	size_t best_frag_r = SIZE_MAX;
 
 	ASSERTne(n, 0);
 
@@ -445,14 +446,18 @@ alloc_class_find_min_frag(struct alloc_class_collection *ac, size_t n)
 		if (units > RUN_UNIT_MAX_ALLOC)
 			continue;
 
-		float frag = (float)(c->unit_size * units) / (float)real_size;
-		if (frag == 1.f)
+		if (c->unit_size * units == real_size)
 			return c;
 
-		ASSERT(frag >= 1.f);
-		if (frag < best_frag || best_c == NULL) {
+		ASSERT(c->unit_size * units > real_size);
+
+		size_t frag_d = (c->unit_size * units) / real_size;
+		size_t frag_r = (c->unit_size * units) % real_size;
+		if (best_c == NULL || frag_d < best_frag_d ||
+			(frag_d == best_frag_d && frag_r < best_frag_r)) {
 			best_c = c;
-			best_frag = frag;
+			best_frag_d = frag_d;
+			best_frag_r = frag_r;
 		}
 	}
 
