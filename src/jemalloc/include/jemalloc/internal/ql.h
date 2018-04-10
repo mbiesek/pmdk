@@ -67,12 +67,12 @@ struct {								\
 } while (0)
 
 #define	ql_head_remove(a_head, a_type, a_field) do {			\
-	a_type *t = ql_first(a_head);					\
+	(a_type) *t = ql_first(a_head);					\
 	ql_remove((a_head), t, a_field);				\
 } while (0)
 
 #define	ql_tail_remove(a_head, a_type, a_field) do {			\
-	a_type *t = ql_last(a_head, a_field);				\
+	(a_type) *t = ql_last(a_head, a_field);				\
 	ql_remove((a_head), t, a_field);				\
 } while (0)
 

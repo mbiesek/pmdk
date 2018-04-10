@@ -14,7 +14,7 @@ typedef struct prof_tdata_s prof_tdata_t;
 #  define PROF_PREFIX_DEFAULT		""
 #endif
 #define	LG_PROF_SAMPLE_DEFAULT		19
-#define	LG_PROF_INTERVAL_DEFAULT	-1
+#define	LG_PROF_INTERVAL_DEFAULT	(-1)
 
 /*
  * Hard limit on stack backtrace depth.  The version of prof_backtrace() that
@@ -247,15 +247,15 @@ void	prof_sample_threshold_update(prof_tdata_t *prof_tdata);
 	prof_tdata_t *prof_tdata;					\
 	prof_bt_t bt;							\
 									\
-	assert(size == s2u(size));					\
+	assert((size) == s2u(size));					\
 									\
 	if (!opt_prof_active ||						\
 	    prof_sample_accum_update(size, false, &prof_tdata)) {	\
-		ret = (prof_thr_cnt_t *)(uintptr_t)1U;			\
+		(ret) = (prof_thr_cnt_t *)(uintptr_t)1U;			\
 	} else {							\
 		bt_init(&bt, prof_tdata->vec);				\
 		prof_backtrace(&bt);					\
-		ret = prof_lookup(&bt);					\
+		(ret) = prof_lookup(&bt);					\
 	}								\
 } while (0)
 

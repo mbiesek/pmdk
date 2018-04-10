@@ -16,8 +16,8 @@ typedef unsigned long bitmap_t;
 
 /* Maximum number of levels possible. */
 #define	BITMAP_MAX_LEVELS						\
-    (LG_BITMAP_MAXBITS / LG_SIZEOF_BITMAP)				\
-    + !!(LG_BITMAP_MAXBITS % LG_SIZEOF_BITMAP)
+    ((LG_BITMAP_MAXBITS / LG_SIZEOF_BITMAP)				\
+    + !!(LG_BITMAP_MAXBITS % LG_SIZEOF_BITMAP))
 
 #endif /* JEMALLOC_H_TYPES */
 /******************************************************************************/
