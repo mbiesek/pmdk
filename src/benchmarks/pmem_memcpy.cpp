@@ -52,8 +52,7 @@
 
 struct pmem_bench;
 
-typedef size_t (*offset_fn)(struct pmem_bench *pmb,
-			    struct operation_info *info);
+using offset_fn = size_t (*)(struct pmem_bench *, struct operation_info *);
 
 /*
  * pmem_args -- benchmark specific arguments

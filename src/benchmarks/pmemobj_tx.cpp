@@ -118,18 +118,15 @@ enum add_range_mode { ADD_RANGE_MODE_ONE_TX, ADD_RANGE_MODE_NESTED_TX };
  */
 enum parse_mode { PARSE_OP_MODE, PARSE_OP_MODE_ADD_RANGE };
 
-typedef size_t (*fn_type_num_t)(struct obj_tx_bench *obj_bench,
-				size_t worker_idx, size_t op_idx);
+using fn_type_num_t = size_t (*)(struct obj_tx_bench *, size_t, size_t);
 
-typedef size_t (*fn_num_t)(size_t idx);
+using fn_num_t = size_t (*)(size_t);
 
-typedef int (*fn_op_t)(struct obj_tx_bench *obj_bench,
-		       struct worker_info *worker, size_t idx);
+using fn_op_t = int (*)(struct obj_tx_bench *, struct worker_info *, size_t);
 
-typedef struct offset (*fn_os_off_t)(struct obj_tx_bench *obj_bench,
-				     size_t idx);
+using fn_os_off_t = struct offset (*)(struct obj_tx_bench *, size_t);
 
-typedef enum op_mode (*fn_parse_t)(const char *arg);
+using fn_parse_t = enum op_mode (*)(const char *);
 
 /*
  * obj_tx_args -- stores command line parsed arguments.

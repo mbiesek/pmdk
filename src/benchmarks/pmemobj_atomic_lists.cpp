@@ -56,13 +56,11 @@ struct element;
 TOID_DECLARE(struct item, 0);
 TOID_DECLARE(struct list, 1);
 
-typedef size_t (*fn_type_num_t)(size_t worker_idx, size_t op_idx);
+using fn_type_num_t = size_t (*)(size_t, size_t);
 
-typedef struct element (*fn_position_t)(struct obj_worker *obj_worker,
-					size_t op_idx);
+using fn_position_t = struct element (*)(struct obj_worker *, size_t);
 
-typedef int (*fn_init_t)(struct worker_info *worker, size_t n_elm,
-			 size_t list_len);
+using fn_init_t = int (*)(struct worker_info *, size_t, size_t);
 /*
  * args -- stores command line parsed arguments.
  */

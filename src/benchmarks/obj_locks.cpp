@@ -139,7 +139,7 @@ struct mutex_bench {
 		(mutexp)->volatile_pmemmutex.mutexp,                           \
 		(int (*)(void **lock, void *arg))volatile_mutex_init)
 
-typedef int (*lock_fun_wrapper)(PMEMobjpool *pop, void *lock);
+using lock_fun_wrapper = int (*)(PMEMobjpool *, void *);
 
 /*
  * bench_operation_1by1 -- acquire lock and unlock release locks

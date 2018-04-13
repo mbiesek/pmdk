@@ -47,8 +47,7 @@
 #define RRAND(max, min) (rand() % ((max) - (min)) + (min))
 
 struct vmem_bench;
-typedef int (*operation)(struct vmem_bench *vb, unsigned worker_idx,
-			 size_t info_idx);
+using operation = int (*)(struct vmem_bench *, unsigned int, size_t);
 
 /*
  * vmem_args -- additional properties set as arguments opts

@@ -52,18 +52,16 @@
 #define max(a, b) ((a) > (b) ? (a) : (b))
 #endif
 
-typedef int (*clo_parse_fn)(struct benchmark_clo *clo, const char *arg,
-			    struct clo_vec *clovec);
+using clo_parse_fn = int (*)(struct benchmark_clo *, const char *,
+			     struct clo_vec *);
 
-typedef int (*clo_parse_single_fn)(struct benchmark_clo *clo, const char *arg,
-				   void *ptr);
+using clo_parse_single_fn = int (*)(struct benchmark_clo *, const char *,
+				    void *);
 
-typedef int (*clo_eval_range_fn)(struct benchmark_clo *clo, void *first,
-				 void *step, void *last, char type,
-				 struct clo_vec_vlist *vlist);
+using clo_eval_range_fn = int (*)(struct benchmark_clo *, void *, void *,
+				  void *, char, struct clo_vec_vlist *);
 
-typedef const char *(*clo_str_fn)(struct benchmark_clo *clo, void *addr,
-				  size_t size);
+using clo_str_fn = const char *(*)(struct benchmark_clo *, void *, size_t);
 
 #define STR_BUFF_SIZE 1024
 static char str_buff[STR_BUFF_SIZE];

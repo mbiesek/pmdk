@@ -51,7 +51,7 @@
 
 struct memset_bench;
 
-typedef int (*operation_fn)(void *dest, int c, size_t len);
+using operation_fn = int (*)(void *, int, size_t);
 
 /*
  * memset_args -- benchmark specific command line options

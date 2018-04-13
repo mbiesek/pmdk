@@ -58,12 +58,11 @@
 struct pobj_bench;
 struct pobj_worker;
 
-typedef size_t (*fn_type_num_t)(struct pobj_bench *ob, size_t worker_idx,
-				size_t op_idx);
+using fn_type_num_t = size_t (*)(struct pobj_bench *, size_t, size_t);
 
-typedef size_t (*fn_size_t)(struct pobj_bench *ob, size_t idx);
+using fn_size_t = size_t (*)(struct pobj_bench *, size_t);
 
-typedef size_t (*fn_num_t)(size_t idx);
+using fn_num_t = size_t (*)(size_t);
 
 /*
  * Enumeration used to determine the mode of the assigning type_number

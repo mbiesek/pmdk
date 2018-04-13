@@ -72,10 +72,10 @@ enum op_mode {
 };
 
 /*
- * typedef for the worker function
+ * worker function
  */
-typedef int (*worker_fn)(struct blk_bench *, struct benchmark_args *,
-			 struct blk_worker *, os_off_t);
+using worker_fn = int (*)(struct blk_bench *, struct benchmark_args *,
+			  struct blk_worker *, os_off_t);
 
 /*
  * blk_args -- benchmark specific arguments
