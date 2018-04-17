@@ -118,7 +118,8 @@ init_offsets(struct benchmark_args *args, struct memset_bench *mb,
 
 	mb->n_offsets = n_ops * n_threads;
 	assert(mb->n_offsets != 0);
-	mb->offsets = (uint64_t *)malloc(mb->n_offsets * sizeof(*mb->offsets));
+	mb->offsets = static_cast<uint64_t *>(
+		malloc(mb->n_offsets * sizeof(*mb->offsets)));
 	if (!mb->offsets) {
 		perror("malloc");
 		return -1;
@@ -254,14 +255,15 @@ warmup_msync(struct memset_bench *mb)
 static int
 memset_op(struct benchmark *bench, struct operation_info *info)
 {
-	auto *mb = (struct memset_bench *)pmembench_get_priv(bench);
+	auto *mb =
+		static_cast<struct memset_bench *>(pmembench_get_priv(bench));
 
 	assert(info->index < mb->n_offsets);
 
 	size_t idx = info->worker->index * info->args->n_ops_per_thread +
 		info->index;
-	void *dest =
-		(char *)mb->pmem_addr + mb->offsets[idx] + mb->pargs->dest_off;
+	void *dest = static_cast<char *>(mb->pmem_addr) + mb->offsets[idx] +
+		mb->pargs->dest_off;
 	int c = mb->const_b;
 	size_t len = mb->pargs->chunk_size;
 
@@ -288,13 +290,14 @@ memset_init(struct benchmark *bench, struct benchmark_args *args)
 	int flags = 0;
 
 	int (*warmup_func)(struct memset_bench *) = warmup_persist;
-	auto *mb = (struct memset_bench *)malloc(sizeof(struct memset_bench));
+	auto *mb = static_cast<struct memset_bench *>(
+		malloc(sizeof(struct memset_bench)));
 	if (!mb) {
 		perror("malloc");
 		return -1;
 	}
 
-	mb->pargs = (struct memset_args *)args->opts;
+	mb->pargs = static_cast<struct memset_args *>(args->opts);
 	mb->pargs->chunk_size = args->dsize;
 
 	enum operation_mode op_mode = parse_op_mode(mb->pargs->mode);
@@ -382,7 +385,8 @@ err_free_mb:
 static int
 memset_exit(struct benchmark *bench, struct benchmark_args *args)
 {
-	auto *mb = (struct memset_bench *)pmembench_get_priv(bench);
+	auto *mb =
+		static_cast<struct memset_bench *>(pmembench_get_priv(bench));
 	pmem_unmap(mb->pmem_addr, mb->fsize);
 	free(mb->offsets);
 	free(mb);

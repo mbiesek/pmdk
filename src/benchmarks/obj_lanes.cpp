@@ -97,14 +97,15 @@ lanes_init(struct benchmark *bench, struct benchmark_args *args)
 	assert(args != nullptr);
 	assert(args->opts != nullptr);
 
-	auto *ob = (struct obj_bench *)malloc(sizeof(struct obj_bench));
+	auto *ob = static_cast<struct obj_bench *>(
+		malloc(sizeof(struct obj_bench)));
 	if (ob == nullptr) {
 		perror("malloc");
 		return -1;
 	}
 	pmembench_set_priv(bench, ob);
 
-	ob->pa = (struct prog_args *)args->opts;
+	ob->pa = static_cast<struct prog_args *>(args->opts);
 	size_t psize;
 
 	if (args->is_poolset || util_file_is_device_dax(args->fname))
@@ -138,7 +139,7 @@ err:
 static int
 lanes_exit(struct benchmark *bench, struct benchmark_args *args)
 {
-	auto *ob = (struct obj_bench *)pmembench_get_priv(bench);
+	auto *ob = static_cast<struct obj_bench *>(pmembench_get_priv(bench));
 
 	pmemobj_close(ob->pop);
 	free(ob);
@@ -152,7 +153,7 @@ lanes_exit(struct benchmark *bench, struct benchmark_args *args)
 static int
 lanes_op(struct benchmark *bench, struct operation_info *info)
 {
-	auto *ob = (struct obj_bench *)pmembench_get_priv(bench);
+	auto *ob = static_cast<struct obj_bench *>(pmembench_get_priv(bench));
 	struct lane_section *section;
 
 	for (int i = 0; i < OPERATION_REPEAT_COUNT; i++) {

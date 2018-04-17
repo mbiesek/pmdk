@@ -210,7 +210,7 @@ static int
 volatile_mutex_init(os_mutex_t **mutexp, void *attr)
 {
 	if (*mutexp == nullptr) {
-		*mutexp = (os_mutex_t *)malloc(sizeof(os_mutex_t));
+		*mutexp = static_cast<os_mutex_t *>(malloc(sizeof(os_mutex_t)));
 		if (*mutexp == nullptr) {
 			perror("volatile_mutex_init alloc");
 			return ENOMEM;
@@ -239,7 +239,7 @@ volatile_mutex_lock(PMEMobjpool *pop, PMEM_volatile_mutex *mutexp)
 static int
 volatile_mutex_unlock(PMEMobjpool *pop, PMEM_volatile_mutex *mutexp)
 {
-	auto *mutex = (os_mutex_t *)GET_VOLATILE_MUTEX(pop, mutexp);
+	auto *mutex = GET_VOLATILE_MUTEX(pop, mutexp);
 	if (mutex == nullptr)
 		return EINVAL;
 
@@ -252,7 +252,7 @@ volatile_mutex_unlock(PMEMobjpool *pop, PMEM_volatile_mutex *mutexp)
 static int
 volatile_mutex_destroy(PMEMobjpool *pop, PMEM_volatile_mutex *mutexp)
 {
-	auto *mutex = (os_mutex_t *)GET_VOLATILE_MUTEX(pop, mutexp);
+	auto *mutex = GET_VOLATILE_MUTEX(pop, mutexp);
 	if (mutex == nullptr)
 		return EINVAL;
 
@@ -271,7 +271,7 @@ volatile_mutex_destroy(PMEMobjpool *pop, PMEM_volatile_mutex *mutexp)
 static int
 os_mutex_lock_wrapper(PMEMobjpool *pop, void *lock)
 {
-	return os_mutex_lock((os_mutex_t *)lock);
+	return os_mutex_lock(static_cast<os_mutex_t *>(lock));
 }
 
 /*
@@ -280,7 +280,7 @@ os_mutex_lock_wrapper(PMEMobjpool *pop, void *lock)
 static int
 os_mutex_unlock_wrapper(PMEMobjpool *pop, void *lock)
 {
-	return os_mutex_unlock((os_mutex_t *)lock);
+	return os_mutex_unlock(static_cast<os_mutex_t *>(lock));
 }
 
 /*
@@ -289,7 +289,7 @@ os_mutex_unlock_wrapper(PMEMobjpool *pop, void *lock)
 static int
 pmemobj_mutex_lock_wrapper(PMEMobjpool *pop, void *lock)
 {
-	return pmemobj_mutex_lock(pop, (PMEMmutex *)lock);
+	return pmemobj_mutex_lock(pop, static_cast<PMEMmutex *>(lock));
 }
 
 /*
@@ -298,7 +298,7 @@ pmemobj_mutex_lock_wrapper(PMEMobjpool *pop, void *lock)
 static int
 pmemobj_mutex_unlock_wrapper(PMEMobjpool *pop, void *lock)
 {
-	return pmemobj_mutex_unlock(pop, (PMEMmutex *)lock);
+	return pmemobj_mutex_unlock(pop, static_cast<PMEMmutex *>(lock));
 }
 
 /*
@@ -307,7 +307,7 @@ pmemobj_mutex_unlock_wrapper(PMEMobjpool *pop, void *lock)
 static int
 os_rwlock_wrlock_wrapper(PMEMobjpool *pop, void *lock)
 {
-	return os_rwlock_wrlock((os_rwlock_t *)lock);
+	return os_rwlock_wrlock(static_cast<os_rwlock_t *>(lock));
 }
 
 /*
@@ -316,7 +316,7 @@ os_rwlock_wrlock_wrapper(PMEMobjpool *pop, void *lock)
 static int
 os_rwlock_rdlock_wrapper(PMEMobjpool *pop, void *lock)
 {
-	return os_rwlock_rdlock((os_rwlock_t *)lock);
+	return os_rwlock_rdlock(static_cast<os_rwlock_t *>(lock));
 }
 
 /*
@@ -325,7 +325,7 @@ os_rwlock_rdlock_wrapper(PMEMobjpool *pop, void *lock)
 static int
 os_rwlock_unlock_wrapper(PMEMobjpool *pop, void *lock)
 {
-	return os_rwlock_unlock((os_rwlock_t *)lock);
+	return os_rwlock_unlock(static_cast<os_rwlock_t *>(lock));
 }
 
 /*
@@ -334,7 +334,7 @@ os_rwlock_unlock_wrapper(PMEMobjpool *pop, void *lock)
 static int
 pmemobj_rwlock_wrlock_wrapper(PMEMobjpool *pop, void *lock)
 {
-	return pmemobj_rwlock_wrlock(pop, (PMEMrwlock *)lock);
+	return pmemobj_rwlock_wrlock(pop, static_cast<PMEMrwlock *>(lock));
 }
 
 /*
@@ -343,7 +343,7 @@ pmemobj_rwlock_wrlock_wrapper(PMEMobjpool *pop, void *lock)
 static int
 pmemobj_rwlock_rdlock_wrapper(PMEMobjpool *pop, void *lock)
 {
-	return pmemobj_rwlock_rdlock(pop, (PMEMrwlock *)lock);
+	return pmemobj_rwlock_rdlock(pop, static_cast<PMEMrwlock *>(lock));
 }
 
 /*
@@ -352,7 +352,7 @@ pmemobj_rwlock_rdlock_wrapper(PMEMobjpool *pop, void *lock)
 static int
 pmemobj_rwlock_unlock_wrapper(PMEMobjpool *pop, void *lock)
 {
-	return pmemobj_rwlock_unlock(pop, (PMEMrwlock *)lock);
+	return pmemobj_rwlock_unlock(pop, static_cast<PMEMrwlock *>(lock));
 }
 
 /*
@@ -361,7 +361,8 @@ pmemobj_rwlock_unlock_wrapper(PMEMobjpool *pop, void *lock)
 static int
 volatile_mutex_lock_wrapper(PMEMobjpool *pop, void *lock)
 {
-	return volatile_mutex_lock(pop, (PMEM_volatile_mutex *)lock);
+	return volatile_mutex_lock(pop,
+				   static_cast<PMEM_volatile_mutex *>(lock));
 }
 
 /*
@@ -370,7 +371,8 @@ volatile_mutex_lock_wrapper(PMEMobjpool *pop, void *lock)
 static int
 volatile_mutex_unlock_wrapper(PMEMobjpool *pop, void *lock)
 {
-	return volatile_mutex_unlock(pop, (PMEM_volatile_mutex *)lock);
+	return volatile_mutex_unlock(pop,
+				     static_cast<PMEM_volatile_mutex *>(lock));
 }
 
 /*
@@ -394,14 +396,15 @@ init_bench_mutex(struct mutex_bench *mb)
 	if (!mb->pa->use_system_threads) {
 		/* initialize PMEM mutexes */
 		for (unsigned i = 0; i < mb->pa->n_locks; i++) {
-			auto *p = (PMEMmutex_internal *)&mb->locks[i];
+			auto *p = reinterpret_cast<PMEMmutex_internal *>(
+				&mb->locks[i]);
 			p->pmemmutex.runid = mb->pa->runid_initial_value;
 			os_mutex_init(&p->PMEMmutex_lock);
 		}
 	} else {
 		/* initialize os_thread mutexes */
 		for (unsigned i = 0; i < mb->pa->n_locks; i++) {
-			auto *p = (os_mutex_t *)&mb->locks[i];
+			auto *p = reinterpret_cast<os_mutex_t *>(&mb->locks[i]);
 			os_mutex_init(p);
 		}
 	}
@@ -418,7 +421,7 @@ exit_bench_mutex(struct mutex_bench *mb)
 	if (mb->pa->use_system_threads) {
 		/* deinitialize os_thread mutex objects */
 		for (unsigned i = 0; i < mb->pa->n_locks; i++) {
-			auto *p = (os_mutex_t *)&mb->locks[i];
+			auto *p = reinterpret_cast<os_mutex_t *>(&mb->locks[i]);
 			os_mutex_destroy(p);
 		}
 	}
@@ -486,14 +489,16 @@ init_bench_rwlock(struct mutex_bench *mb)
 	if (!mb->pa->use_system_threads) {
 		/* initialize PMEM rwlocks */
 		for (unsigned i = 0; i < mb->pa->n_locks; i++) {
-			auto *p = (PMEMrwlock_internal *)&mb->locks[i];
+			auto *p = reinterpret_cast<PMEMrwlock_internal *>(
+				&mb->locks[i]);
 			p->pmemrwlock.runid = mb->pa->runid_initial_value;
 			os_rwlock_init(&p->PMEMrwlock_lock);
 		}
 	} else {
 		/* initialize os_thread rwlocks */
 		for (unsigned i = 0; i < mb->pa->n_locks; i++) {
-			auto *p = (os_rwlock_t *)&mb->locks[i];
+			auto *p =
+				reinterpret_cast<os_rwlock_t *>(&mb->locks[i]);
 			os_rwlock_init(p);
 		}
 	}
@@ -510,7 +515,8 @@ exit_bench_rwlock(struct mutex_bench *mb)
 	if (mb->pa->use_system_threads) {
 		/* deinitialize os_thread mutex objects */
 		for (unsigned i = 0; i < mb->pa->n_locks; i++) {
-			auto *p = (os_rwlock_t *)&mb->locks[i];
+			auto *p =
+				reinterpret_cast<os_rwlock_t *>(&mb->locks[i]);
 			os_rwlock_destroy(p);
 		}
 	}
@@ -582,7 +588,8 @@ init_bench_vmutex(struct mutex_bench *mb)
 
 	/* initialize PMEM volatile mutexes */
 	for (unsigned i = 0; i < mb->pa->n_locks; i++) {
-		auto *p = (PMEM_volatile_mutex *)&mb->locks[i];
+		auto *p =
+			reinterpret_cast<PMEM_volatile_mutex *>(&mb->locks[i]);
 		p->volatile_pmemmutex.runid = mb->pa->runid_initial_value;
 		volatile_mutex_init(&p->volatile_pmemmutex.mutexp, nullptr);
 	}
@@ -598,7 +605,8 @@ static int
 exit_bench_vmutex(struct mutex_bench *mb)
 {
 	for (unsigned i = 0; i < mb->pa->n_locks; i++) {
-		auto *p = (PMEM_volatile_mutex *)&mb->locks[i];
+		auto *p =
+			reinterpret_cast<PMEM_volatile_mutex *>(&mb->locks[i]);
 		volatile_mutex_destroy(mb->pop, p);
 	}
 
@@ -679,13 +687,14 @@ locks_init(struct benchmark *bench, struct benchmark_args *args)
 	int ret = 0;
 	size_t poolsize;
 
-	struct mutex_bench *mb = (struct mutex_bench *)malloc(sizeof(*mb));
+	struct mutex_bench *mb =
+		static_cast<struct mutex_bench *>(malloc(sizeof(*mb)));
 	if (mb == nullptr) {
 		perror("malloc");
 		return -1;
 	}
 
-	mb->pa = (struct prog_args *)args->opts;
+	mb->pa = static_cast<struct prog_args *>(args->opts);
 
 	mb->lock_mode = parse_op_mode(mb->pa->lock_mode);
 	if (mb->lock_mode >= OP_MODE_MAX) {
@@ -752,7 +761,7 @@ locks_exit(struct benchmark *bench, struct benchmark_args *args)
 	assert(bench != nullptr);
 	assert(args != nullptr);
 
-	auto *mb = (struct mutex_bench *)pmembench_get_priv(bench);
+	auto *mb = static_cast<struct mutex_bench *>(pmembench_get_priv(bench));
 	assert(mb != nullptr);
 
 	mb->ops->bench_exit(mb);
@@ -771,7 +780,7 @@ locks_exit(struct benchmark *bench, struct benchmark_args *args)
 static int
 locks_op(struct benchmark *bench, struct operation_info *info)
 {
-	auto *mb = (struct mutex_bench *)pmembench_get_priv(bench);
+	auto *mb = static_cast<struct mutex_bench *>(pmembench_get_priv(bench));
 	assert(mb != nullptr);
 	assert(mb->pop != nullptr);
 	assert(!TOID_IS_NULL(mb->root));

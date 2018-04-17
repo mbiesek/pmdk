@@ -130,7 +130,8 @@ init_offsets(struct benchmark_args *args, struct rpmem_bench *mb,
 		(args->n_threads * mb->csize_align);
 
 	mb->n_offsets = args->n_ops_per_thread * args->n_threads;
-	mb->offsets = (size_t *)malloc(mb->n_offsets * sizeof(*mb->offsets));
+	mb->offsets = static_cast<size_t *>(
+		malloc(mb->n_offsets * sizeof(*mb->offsets)));
 	if (!mb->offsets) {
 		perror("malloc");
 		return -1;
@@ -185,7 +186,7 @@ static int
 do_warmup(struct rpmem_bench *mb)
 {
 	/* clear the entire pool */
-	memset((char *)mb->pool + POOL_HDR_SIZE, 0,
+	memset(static_cast<char *>(mb->pool) + POOL_HDR_SIZE, 0,
 	       mb->pool_size - POOL_HDR_SIZE);
 
 	for (unsigned r = 0; r < mb->nreplicas; ++r) {
@@ -197,7 +198,7 @@ do_warmup(struct rpmem_bench *mb)
 
 	/* if no memset for each operation, do one big memset */
 	if (mb->pargs->no_memset) {
-		memset((char *)mb->pool + POOL_HDR_SIZE, 0xFF,
+		memset(static_cast<char *>(mb->pool) + POOL_HDR_SIZE, 0xFF,
 		       mb->pool_size - POOL_HDR_SIZE);
 	}
 
@@ -210,7 +211,7 @@ do_warmup(struct rpmem_bench *mb)
 static int
 rpmem_op(struct benchmark *bench, struct operation_info *info)
 {
-	auto *mb = (struct rpmem_bench *)pmembench_get_priv(bench);
+	auto *mb = static_cast<struct rpmem_bench *>(pmembench_get_priv(bench));
 
 	assert(info->index < mb->n_offsets);
 
@@ -220,7 +221,7 @@ rpmem_op(struct benchmark *bench, struct operation_info *info)
 	size_t len = mb->pargs->chunk_size;
 
 	if (!mb->pargs->no_memset) {
-		void *dest = (char *)mb->pool + offset;
+		void *dest = static_cast<char *>(mb->pool) + offset;
 		/* thread id on MS 4 bits and operation id on LS 4 bits */
 		int c = ((info->worker->index & 0xf) << 4) +
 			((0xf & info->index));
@@ -331,7 +332,7 @@ rpmem_poolset_init(const char *path, struct rpmem_bench *mb,
 		goto err_poolset_free;
 	}
 
-	part = (struct pool_set_part *)&rep->part[0];
+	part = &rep->part[0];
 	if (rpmem_map_file(part->path, mb, rep->repsize)) {
 		perror(part->path);
 		goto err_poolset_free;
@@ -342,13 +343,15 @@ rpmem_poolset_init(const char *path, struct rpmem_bench *mb,
 
 	/* prepare remote replicas */
 	mb->nreplicas = set->nreplicas - 1;
-	mb->nlanes = (unsigned *)malloc(mb->nreplicas * sizeof(unsigned));
+	mb->nlanes = static_cast<unsigned *>(
+		malloc(mb->nreplicas * sizeof(unsigned)));
 	if (mb->nlanes == nullptr) {
 		perror("malloc");
 		goto err_unmap_file;
 	}
 
-	mb->rpp = (RPMEMpool **)malloc(mb->nreplicas * sizeof(RPMEMpool *));
+	mb->rpp = static_cast<RPMEMpool **>(
+		malloc(mb->nreplicas * sizeof(RPMEMpool *)));
 	if (mb->rpp == nullptr) {
 		perror("malloc");
 		goto err_free_lanes;
@@ -455,13 +458,14 @@ rpmem_init(struct benchmark *bench, struct benchmark_args *args)
 	assert(args != nullptr);
 	assert(args->opts != nullptr);
 
-	auto *mb = (struct rpmem_bench *)malloc(sizeof(struct rpmem_bench));
+	auto *mb = static_cast<struct rpmem_bench *>(
+		malloc(sizeof(struct rpmem_bench)));
 	if (!mb) {
 		perror("malloc");
 		return -1;
 	}
 
-	mb->pargs = (struct rpmem_args *)args->opts;
+	mb->pargs = static_cast<struct rpmem_args *>(args->opts);
 	mb->pargs->chunk_size = args->dsize;
 
 	enum operation_mode op_mode = parse_op_mode(mb->pargs->mode);
@@ -508,7 +512,7 @@ err_parse_mode:
 static int
 rpmem_exit(struct benchmark *bench, struct benchmark_args *args)
 {
-	auto *mb = (struct rpmem_bench *)pmembench_get_priv(bench);
+	auto *mb = static_cast<struct rpmem_bench *>(pmembench_get_priv(bench));
 	rpmem_poolset_fini(mb);
 	free(mb->offsets);
 	free(mb);

@@ -390,10 +390,11 @@ pmem_memcpy_init(struct benchmark *bench, struct benchmark_args *args)
 	size_t file_size = 0;
 	int flags = 0;
 
-	auto *pmb = (struct pmem_bench *)malloc(sizeof(struct pmem_bench));
+	auto *pmb = static_cast<struct pmem_bench *>(
+		malloc(sizeof(struct pmem_bench)));
 	assert(pmb != nullptr);
 
-	pmb->pargs = (struct pmem_args *)args->opts;
+	pmb->pargs = static_cast<struct pmem_args *>(args->opts);
 	assert(pmb->pargs != nullptr);
 
 	pmb->pargs->chunk_size = args->dsize;
@@ -407,8 +408,8 @@ pmem_memcpy_init(struct benchmark *bench, struct benchmark_args *args)
 		ret = -1;
 		goto err_free_pmb;
 	}
-	pmb->buf =
-		(unsigned char *)util_aligned_malloc(FLUSH_ALIGN, pmb->bsize);
+	pmb->buf = static_cast<unsigned char *>(
+		util_aligned_malloc(FLUSH_ALIGN, pmb->bsize));
 	if (pmb->buf == nullptr) {
 		perror("posix_memalign");
 		ret = -1;
@@ -417,8 +418,8 @@ pmem_memcpy_init(struct benchmark *bench, struct benchmark_args *args)
 
 	pmb->n_rand_offsets = args->n_ops_per_thread * args->n_threads;
 	assert(pmb->n_rand_offsets != 0);
-	pmb->rand_offsets = (unsigned *)malloc(pmb->n_rand_offsets *
-					       sizeof(*pmb->rand_offsets));
+	pmb->rand_offsets = static_cast<unsigned *>(
+		malloc(pmb->n_rand_offsets * sizeof(*pmb->rand_offsets)));
 
 	if (pmb->rand_offsets == nullptr) {
 		perror("malloc");
@@ -435,8 +436,8 @@ pmem_memcpy_init(struct benchmark *bench, struct benchmark_args *args)
 	}
 
 	/* create a pmem file and memory map it */
-	pmb->pmem_addr = (unsigned char *)pmem_map_file(
-		args->fname, file_size, flags, args->fmode, nullptr, nullptr);
+	pmb->pmem_addr = static_cast<unsigned char *>(pmem_map_file(
+		args->fname, file_size, flags, args->fmode, nullptr, nullptr));
 	if (pmb->pmem_addr == nullptr) {
 		perror(args->fname);
 		ret = -1;
@@ -504,7 +505,7 @@ err_free_pmb:
 static int
 pmem_memcpy_operation(struct benchmark *bench, struct operation_info *info)
 {
-	auto *pmb = (struct pmem_bench *)pmembench_get_priv(bench);
+	auto *pmb = static_cast<struct pmem_bench *>(pmembench_get_priv(bench));
 
 	size_t src_index = pmb->func_src(pmb, info);
 
@@ -526,7 +527,7 @@ pmem_memcpy_operation(struct benchmark *bench, struct operation_info *info)
 static int
 pmem_memcpy_exit(struct benchmark *bench, struct benchmark_args *args)
 {
-	auto *pmb = (struct pmem_bench *)pmembench_get_priv(bench);
+	auto *pmb = static_cast<struct pmem_bench *>(pmembench_get_priv(bench));
 	pmem_unmap(pmb->pmem_addr, pmb->fsize);
 	util_aligned_free(pmb->buf);
 	free(pmb->rand_offsets);

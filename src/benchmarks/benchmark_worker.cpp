@@ -73,7 +73,7 @@ static void *
 thread_func(void *arg)
 {
 	assert(arg != nullptr);
-	auto *worker = (struct benchmark_worker *)arg;
+	auto *worker = static_cast<struct benchmark_worker *>(arg);
 
 	os_mutex_lock(&worker->lock);
 
@@ -113,7 +113,7 @@ struct benchmark_worker *
 benchmark_worker_alloc(void)
 {
 	struct benchmark_worker *w =
-		(struct benchmark_worker *)calloc(1, sizeof(*w));
+		static_cast<struct benchmark_worker *>(calloc(1, sizeof(*w)));
 
 	if (!w)
 		return nullptr;

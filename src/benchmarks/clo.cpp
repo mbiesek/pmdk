@@ -147,10 +147,10 @@ parse_number_base(const char *arg, void *value, int s, int base)
 	char *end;
 	errno = 0;
 	if (s) {
-		auto *v = (int64_t *)value;
+		auto *v = static_cast<int64_t *>(value);
 		*v = strtoll(arg, &end, base);
 	} else {
-		auto *v = (uint64_t *)value;
+		auto *v = static_cast<uint64_t *>(value);
 		*v = strtoull(arg, &end, base);
 	}
 
@@ -197,8 +197,10 @@ clo_parse_single_int(struct benchmark_clo *clo, const char *arg, void *ptr)
 		return -1;
 	}
 
-	int64_t tmax = ((int64_t)1 << (8 * clo->type_int.size - 1)) - 1;
-	int64_t tmin = -((int64_t)1 << (8 * clo->type_int.size - 1));
+	int64_t tmax =
+		(static_cast<int64_t>(1) << (8 * clo->type_int.size - 1)) - 1;
+	int64_t tmin =
+		-(static_cast<int64_t>(1) << (8 * clo->type_int.size - 1));
 
 	tmax = min(tmax, clo->type_int.max);
 	tmin = max(tmin, clo->type_int.min);
@@ -253,9 +255,9 @@ static int
 clo_eval_range_uint(struct benchmark_clo *clo, void *first, void *step,
 		    void *last, char type, struct clo_vec_vlist *vlist)
 {
-	uint64_t curr = *(uint64_t *)first;
-	uint64_t l = *(uint64_t *)last;
-	int64_t s = *(int64_t *)step;
+	uint64_t curr = *static_cast<uint64_t *>(first);
+	uint64_t l = *static_cast<uint64_t *>(last);
+	int64_t s = *static_cast<int64_t *>(step);
 
 	while (1) {
 		clo_vec_vlist_add(vlist, &curr, clo->type_uint.size);
@@ -267,7 +269,7 @@ clo_eval_range_uint(struct benchmark_clo *clo, void *first, void *step,
 					return 0;
 				break;
 			case '-':
-				if (curr < (uint64_t)s)
+				if (curr < static_cast<uint64_t>(s))
 					return 0;
 				curr -= s;
 				if (curr < l)
@@ -298,9 +300,9 @@ static int
 clo_eval_range_int(struct benchmark_clo *clo, void *first, void *step,
 		   void *last, char type, struct clo_vec_vlist *vlist)
 {
-	int64_t curr = *(int64_t *)first;
-	int64_t l = *(int64_t *)last;
-	uint64_t s = *(uint64_t *)step;
+	int64_t curr = *static_cast<int64_t *>(first);
+	int64_t l = *static_cast<int64_t *>(last);
+	uint64_t s = *static_cast<uint64_t *>(step);
 
 	while (1) {
 		clo_vec_vlist_add(vlist, &curr, clo->type_int.size);
@@ -379,12 +381,12 @@ clo_parse_range(struct benchmark_clo *clo, const char *arg,
 		clo_parse_single_fn parse_single, clo_eval_range_fn eval_range,
 		struct clo_vec_vlist *vlist)
 {
-	auto *str_first = (char *)malloc(strlen(arg) + 1);
+	auto *str_first = static_cast<char *>(malloc(strlen(arg) + 1));
 	assert(str_first != nullptr);
-	auto *str_step = (char *)malloc(strlen(arg) + 1);
+	auto *str_step = static_cast<char *>(malloc(strlen(arg) + 1));
 	assert(str_step != nullptr);
 	char step_type = '\0';
-	auto *str_last = (char *)malloc(strlen(arg) + 1);
+	auto *str_last = static_cast<char *>(malloc(strlen(arg) + 1));
 	assert(str_last != nullptr);
 
 	int ret = sscanf(arg, "%[^:]:%c%[^:]:%[^:]", str_first, &step_type,
@@ -534,7 +536,8 @@ clo_str_flag(struct benchmark_clo *clo, void *addr, size_t size)
 	if (clo->off + sizeof(bool) > size)
 		return nullptr;
 
-	bool flag = *(bool *)((char *)addr + clo->off);
+	bool flag =
+		*reinterpret_cast<bool *>(static_cast<char *>(addr) + clo->off);
 
 	return flag ? "true" : "false";
 }
@@ -548,7 +551,7 @@ clo_str_str(struct benchmark_clo *clo, void *addr, size_t size)
 	if (clo->off + sizeof(char *) > size)
 		return nullptr;
 
-	return *(char **)((char *)addr + clo->off);
+	return *reinterpret_cast<char **>(static_cast<char *>(addr) + clo->off);
 }
 
 /*
@@ -560,25 +563,25 @@ clo_str_int(struct benchmark_clo *clo, void *addr, size_t size)
 	if (clo->off + clo->type_int.size > size)
 		return nullptr;
 
-	void *val = (char *)addr + clo->off;
+	void *val = static_cast<char *>(addr) + clo->off;
 
 	int ret = 0;
 	switch (clo->type_int.size) {
 		case 1:
 			ret = snprintf(str_buff, STR_BUFF_SIZE, "%" PRId8,
-				       *(int8_t *)val);
+				       *static_cast<int8_t *>(val));
 			break;
 		case 2:
 			ret = snprintf(str_buff, STR_BUFF_SIZE, "%" PRId16,
-				       *(int16_t *)val);
+				       *static_cast<int16_t *>(val));
 			break;
 		case 4:
 			ret = snprintf(str_buff, STR_BUFF_SIZE, "%" PRId32,
-				       *(int32_t *)val);
+				       *static_cast<int32_t *>(val));
 			break;
 		case 8:
 			ret = snprintf(str_buff, STR_BUFF_SIZE, "%" PRId64,
-				       *(int64_t *)val);
+				       *static_cast<int64_t *>(val));
 			break;
 		default:
 			return nullptr;
@@ -598,25 +601,25 @@ clo_str_uint(struct benchmark_clo *clo, void *addr, size_t size)
 	if (clo->off + clo->type_uint.size > size)
 		return nullptr;
 
-	void *val = (char *)addr + clo->off;
+	void *val = static_cast<char *>(addr) + clo->off;
 
 	int ret = 0;
 	switch (clo->type_uint.size) {
 		case 1:
 			ret = snprintf(str_buff, STR_BUFF_SIZE, "%" PRIu8,
-				       *(uint8_t *)val);
+				       *static_cast<uint8_t *>(val));
 			break;
 		case 2:
 			ret = snprintf(str_buff, STR_BUFF_SIZE, "%" PRIu16,
-				       *(uint16_t *)val);
+				       *static_cast<uint16_t *>(val));
 			break;
 		case 4:
 			ret = snprintf(str_buff, STR_BUFF_SIZE, "%" PRIu32,
-				       *(uint32_t *)val);
+				       *static_cast<uint32_t *>(val));
 			break;
 		case 8:
 			ret = snprintf(str_buff, STR_BUFF_SIZE, "%" PRIu64,
-				       *(uint64_t *)val);
+				       *static_cast<uint64_t *>(val));
 			break;
 		default:
 			return nullptr;
@@ -699,7 +702,7 @@ clo_get_optstr(struct benchmark_clo *clos, size_t nclo)
 	 */
 	size_t optstrlen = nclo * 2 + 1;
 
-	optstr = (char *)calloc(1, optstrlen);
+	optstr = static_cast<char *>(calloc(1, optstrlen));
 	assert(optstr != nullptr);
 
 	ptr = optstr;
@@ -728,7 +731,8 @@ clo_get_long_options(struct benchmark_clo *clos, size_t nclo)
 	size_t i;
 	struct option *options;
 
-	options = (struct option *)calloc(nclo + 1, sizeof(struct option));
+	options = static_cast<struct option *>(
+		calloc(nclo + 1, sizeof(struct option)));
 	assert(options != nullptr);
 
 	for (i = 0; i < nclo; i++) {

@@ -311,7 +311,8 @@ pmembench_set_priv(struct benchmark *bench, void *priv)
 int
 pmembench_register(struct benchmark_info *bench_info)
 {
-	struct benchmark *bench = (struct benchmark *)calloc(1, sizeof(*bench));
+	struct benchmark *bench =
+		static_cast<struct benchmark *>(calloc(1, sizeof(*bench)));
 	assert(bench != nullptr);
 
 	bench->info = bench_info;
@@ -360,8 +361,8 @@ pmembench_merge_clos(struct benchmark *bench)
 		nclos += bench->info->nclos;
 	}
 
-	auto *clos = (struct benchmark_clo *)calloc(
-		nclos, sizeof(struct benchmark_clo));
+	auto *clos = static_cast<struct benchmark_clo *>(
+		calloc(nclos, sizeof(struct benchmark_clo)));
 	assert(clos != nullptr);
 
 	memcpy(clos, pmembench_clos, pb_nclos * sizeof(struct benchmark_clo));
@@ -584,7 +585,7 @@ pmembench_init_workers(struct benchmark_worker **workers, size_t nworkers,
 					goto end;
 				}
 			} else {
-				cpu = (int)i;
+				cpu = static_cast<int>(i);
 			}
 
 			assert(ncpus > 0);
@@ -603,8 +604,8 @@ pmembench_init_workers(struct benchmark_worker **workers, size_t nworkers,
 
 		workers[i]->info.index = i;
 		workers[i]->info.nops = n_ops;
-		workers[i]->info.opinfo = (struct operation_info *)calloc(
-			n_ops, sizeof(struct operation_info));
+		workers[i]->info.opinfo = static_cast<struct operation_info *>(
+			calloc(n_ops, sizeof(struct operation_info)));
 		size_t j;
 		for (j = 0; j < n_ops; j++) {
 			workers[i]->info.opinfo[j].worker = &workers[i]->info;
@@ -647,8 +648,8 @@ results_store(struct bench_results *res, struct benchmark_worker **workers,
 static int
 compare_time(const void *p1, const void *p2)
 {
-	const auto *t1 = (const benchmark_time_t *)p1;
-	const auto *t2 = (const benchmark_time_t *)p2;
+	const auto *t1 = static_cast<const benchmark_time_t *>(p1);
+	const auto *t2 = static_cast<const benchmark_time_t *>(p2);
 
 	return benchmark_time_compare(t1, t2);
 }
@@ -659,8 +660,8 @@ compare_time(const void *p1, const void *p2)
 static int
 compare_doubles(const void *a1, const void *b1)
 {
-	const auto *a = (const double *)a1;
-	const auto *b = (const double *)b1;
+	const auto *a = static_cast<const double *>(a1);
+	const auto *b = static_cast<const double *>(b1);
 	return (*a > *b) - (*a < *b);
 }
 
@@ -670,8 +671,8 @@ compare_doubles(const void *a1, const void *b1)
 static int
 compare_uint64t(const void *a1, const void *b1)
 {
-	const auto *a = (const uint64_t *)a1;
-	const auto *b = (const uint64_t *)b1;
+	const auto *a = static_cast<const uint64_t *>(a1);
+	const auto *b = static_cast<const uint64_t *>(b1);
 	return (*a > *b) - (*a < *b);
 }
 
@@ -682,25 +683,25 @@ static struct total_results *
 results_alloc(size_t nrepeats, size_t nthreads, size_t nops)
 {
 	struct total_results *total =
-		(struct total_results *)malloc(sizeof(*total));
+		static_cast<struct total_results *>(malloc(sizeof(*total)));
 	assert(total != nullptr);
 	total->nrepeats = nrepeats;
 	total->nthreads = nthreads;
 	total->nops = nops;
-	total->res =
-		(struct bench_results *)malloc(nrepeats * sizeof(*total->res));
+	total->res = static_cast<struct bench_results *>(
+		malloc(nrepeats * sizeof(*total->res)));
 	assert(total->res != nullptr);
 
 	for (size_t i = 0; i < nrepeats; i++) {
 		struct bench_results *res = &total->res[i];
 		assert(nthreads != 0);
-		res->thres = (struct thread_results **)malloc(
-			nthreads * sizeof(*res->thres));
+		res->thres = static_cast<struct thread_results **>(
+			malloc(nthreads * sizeof(*res->thres)));
 		assert(res->thres != nullptr);
 		for (size_t j = 0; j < nthreads; j++) {
-			res->thres[j] = (struct thread_results *)malloc(
-				sizeof(*res->thres[j]) +
-				nops * sizeof(benchmark_time_t));
+			res->thres[j] = static_cast<struct thread_results *>(
+				malloc(sizeof(*res->thres[j]) +
+				       nops * sizeof(benchmark_time_t)));
 			assert(res->thres[j] != nullptr);
 		}
 	}
@@ -743,13 +744,14 @@ get_total_results(struct total_results *tres)
 	tres->latency.max = 0;
 
 	/* allocate helper arrays */
-	benchmark_time_t *tbeg =
-		(benchmark_time_t *)malloc(tres->nthreads * sizeof(*tbeg));
+	benchmark_time_t *tbeg = static_cast<benchmark_time_t *>(
+		malloc(tres->nthreads * sizeof(*tbeg)));
 	assert(tbeg != nullptr);
-	benchmark_time_t *tend =
-		(benchmark_time_t *)malloc(tres->nthreads * sizeof(*tend));
+	benchmark_time_t *tend = static_cast<benchmark_time_t *>(
+		malloc(tres->nthreads * sizeof(*tend)));
 	assert(tend != nullptr);
-	auto *totals = (double *)malloc(tres->nrepeats * sizeof(double));
+	auto *totals =
+		static_cast<double *>(malloc(tres->nrepeats * sizeof(double)));
 	assert(totals != nullptr);
 
 	/* estimate total penalty of getting time from the system */
@@ -806,11 +808,11 @@ get_total_results(struct total_results *tres)
 	}
 
 	/* total average time */
-	tres->total.avg /= (double)tres->nrepeats;
+	tres->total.avg /= static_cast<double>(tres->nrepeats);
 
 	/* number of operations per second */
-	tres->nopsps =
-		(double)tres->nops * (double)tres->nthreads / tres->total.avg;
+	tres->nopsps = static_cast<double>(tres->nops) *
+		static_cast<double>(tres->nthreads) / tres->total.avg;
 
 	/* std deviation of total time */
 	for (size_t i = 0; i < tres->nrepeats; i++) {
@@ -852,7 +854,8 @@ get_total_results(struct total_results *tres)
 	assert(count > 0);
 	tres->latency.avg /= count;
 
-	auto *ntotals = (uint64_t *)calloc(count, sizeof(uint64_t));
+	auto *ntotals =
+		static_cast<uint64_t *>(calloc(count, sizeof(uint64_t)));
 	assert(ntotals != nullptr);
 	count = 0;
 
@@ -1053,7 +1056,8 @@ pmembench_parse_opts(struct pmembench *pb)
 		goto out;
 	}
 
-	opts = (struct benchmark_opts *)clo_vec_get_args(clovec, 0);
+	opts = static_cast<struct benchmark_opts *>(
+		clo_vec_get_args(clovec, 0));
 	if (opts == nullptr) {
 		ret = -1;
 		goto out;
@@ -1099,7 +1103,8 @@ pmembench_remove_file(const char *path)
 		if (strcmp(info.filename, ".") == 0 ||
 		    strcmp(info.filename, "..") == 0)
 			continue;
-		tmp = (char *)malloc(strlen(path) + strlen(info.filename) + 2);
+		tmp = static_cast<char *>(
+			malloc(strlen(path) + strlen(info.filename) + 2));
 		if (tmp == nullptr)
 			return -1;
 		sprintf(tmp, "%s/%s", path, info.filename);
@@ -1160,8 +1165,8 @@ pmembench_single_repeat(struct benchmark *bench, struct benchmark_args *args,
 	assert(args->n_threads != 0);
 
 	struct benchmark_worker **workers;
-	workers = (struct benchmark_worker **)malloc(
-		args->n_threads * sizeof(struct benchmark_worker *));
+	workers = static_cast<struct benchmark_worker **>(
+		malloc(args->n_threads * sizeof(struct benchmark_worker *)));
 	assert(workers != nullptr);
 
 	if ((ret = pmembench_init_workers(workers, n_threads, n_ops, bench,
@@ -1228,9 +1233,9 @@ scale_up_min_exe_time(struct benchmark *bench, struct benchmark_args *args,
 		 * scale up number of operations to get assumed minimal
 		 * execution time
 		 */
-		n_ops = (size_t)((double)n_ops *
-				 (min_exe_time + MIN_EXE_TIME_E) /
-				 total_res->total.min);
+		n_ops = static_cast<size_t>(static_cast<double>(n_ops) *
+					    (min_exe_time + MIN_EXE_TIME_E) /
+					    total_res->total.min);
 		args->n_ops_per_thread = n_ops;
 
 		results_free(total_res);
@@ -1312,7 +1317,8 @@ pmembench_run(struct pmembench *pb, struct benchmark *bench)
 		goto out_release_args;
 	}
 
-	args = (struct benchmark_args *)clo_vec_get_args(clovec, 0);
+	args = static_cast<struct benchmark_args *>(
+		clo_vec_get_args(clovec, 0));
 	if (args == nullptr) {
 		warn("%s: parsing command line arguments failed",
 		     bench->info->name);
@@ -1330,8 +1336,8 @@ pmembench_run(struct pmembench *pb, struct benchmark *bench)
 	size_t args_i;
 	for (args_i = 0; args_i < clovec->nargs; args_i++) {
 
-		args = (struct benchmark_args *)clo_vec_get_args(clovec,
-								 args_i);
+		args = static_cast<struct benchmark_args *>(
+			clo_vec_get_args(clovec, args_i));
 		if (args == nullptr) {
 			warn("%s: parsing command line arguments failed",
 			     bench->info->name);
@@ -1368,11 +1374,11 @@ pmembench_run(struct pmembench *pb, struct benchmark *bench)
 			!bench->info->multiops ? 1 : args->n_ops_per_thread;
 		size_t n_ops_per_thread_copy = args->n_ops_per_thread;
 
-		stats = (struct latency *)calloc(args->repeats,
-						 sizeof(struct latency));
+		stats = static_cast<struct latency *>(
+			calloc(args->repeats, sizeof(struct latency)));
 		assert(stats != nullptr);
-		workers_times = (double *)calloc(n_threads * args->repeats,
-						 sizeof(double));
+		workers_times = static_cast<double *>(
+			calloc(n_threads * args->repeats, sizeof(double)));
 		assert(workers_times != nullptr);
 		total_res = results_alloc(args->repeats, args->n_threads,
 					  args->n_ops_per_thread);
@@ -1562,7 +1568,8 @@ main(int argc, char *argv[])
 	int ret = 0;
 	int fexists;
 	struct benchmark *bench;
-	struct pmembench *pb = (struct pmembench *)calloc(1, sizeof(*pb));
+	struct pmembench *pb =
+		static_cast<struct pmembench *>(calloc(1, sizeof(*pb)));
 	assert(pb != nullptr);
 	Get_time_avg = benchmark_get_avg_get_time();
 

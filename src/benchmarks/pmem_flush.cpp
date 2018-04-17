@@ -379,10 +379,11 @@ pmem_flush_init(struct benchmark *bench, struct benchmark_args *args)
 
 	uint64_t (*func_mode)(struct pmem_bench * pmb, uint64_t index);
 
-	auto *pmb = (struct pmem_bench *)malloc(sizeof(struct pmem_bench));
+	auto *pmb = static_cast<struct pmem_bench *>(
+		malloc(sizeof(struct pmem_bench)));
 	assert(pmb != nullptr);
 
-	pmb->pargs = (struct pmem_args *)args->opts;
+	pmb->pargs = static_cast<struct pmem_args *>(args->opts);
 	assert(pmb->pargs != nullptr);
 
 	int i = parse_op_type(pmb->pargs->operation);
@@ -408,7 +409,8 @@ pmem_flush_init(struct benchmark *bench, struct benchmark_args *args)
 
 	/* populate offsets array */
 	assert(pmb->n_offsets != 0);
-	pmb->offsets = (size_t *)malloc(pmb->n_offsets * sizeof(*pmb->offsets));
+	pmb->offsets = static_cast<size_t *>(
+		malloc(pmb->n_offsets * sizeof(*pmb->offsets)));
 	assert(pmb->offsets != nullptr);
 
 	for (size_t i = 0; i < pmb->n_offsets; ++i)
@@ -462,8 +464,13 @@ pmem_flush_init(struct benchmark *bench, struct benchmark_args *args)
 	if (!pmb->pargs->no_warmup) {
 		size_t off;
 		for (off = 0; off < pmb->fsize - PAGE_2M; off += PAGE_4K) {
-			*(int *)((char *)pmb->pmem_addr_aligned + off) = 0;
-			*(int *)((char *)pmb->nondirty_addr_aligned + off) = 0;
+			*reinterpret_cast<int *>(
+				static_cast<char *>(pmb->pmem_addr_aligned) +
+				off) = 0;
+			*reinterpret_cast<int *>(
+				static_cast<char *>(
+					pmb->nondirty_addr_aligned) +
+				off) = 0;
 		}
 	}
 
@@ -485,7 +492,7 @@ err_free_pmb:
 static int
 pmem_flush_exit(struct benchmark *bench, struct benchmark_args *args)
 {
-	auto *pmb = (struct pmem_bench *)pmembench_get_priv(bench);
+	auto *pmb = static_cast<struct pmem_bench *>(pmembench_get_priv(bench));
 	pmem_unmap(pmb->pmem_addr, pmb->fsize);
 	munmap(pmb->nondirty_addr, pmb->fsize);
 	free(pmb);
@@ -498,17 +505,17 @@ pmem_flush_exit(struct benchmark *bench, struct benchmark_args *args)
 static int
 pmem_flush_operation(struct benchmark *bench, struct operation_info *info)
 {
-	auto *pmb = (struct pmem_bench *)pmembench_get_priv(bench);
+	auto *pmb = static_cast<struct pmem_bench *>(pmembench_get_priv(bench));
 
 	size_t op_idx = info->index;
 	assert(op_idx < pmb->n_offsets);
 
 	uint64_t chunk_idx = pmb->offsets[op_idx];
-	void *addr =
-		(char *)pmb->pmem_addr_aligned + chunk_idx * info->args->dsize;
+	void *addr = static_cast<char *>(pmb->pmem_addr_aligned) +
+		chunk_idx * info->args->dsize;
 
 	/* store + flush */
-	*(int *)addr = *(int *)addr + 1;
+	*static_cast<int *>(addr) = *static_cast<int *>(addr) + 1;
 	pmb->func_op(pmb, addr, info->args->dsize);
 	return 0;
 }

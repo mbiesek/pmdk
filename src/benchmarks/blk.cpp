@@ -155,7 +155,7 @@ blk_do_warmup(struct blk_bench *bb, struct benchmark_args *args)
 {
 	size_t lba;
 	int ret = 0;
-	auto *buff = (char *)calloc(1, args->dsize);
+	auto *buff = static_cast<char *>(calloc(1, args->dsize));
 	if (!buff) {
 		perror("calloc");
 		return -1;
@@ -166,7 +166,7 @@ blk_do_warmup(struct blk_bench *bb, struct benchmark_args *args)
 			case OP_TYPE_FILE: {
 				size_t off = lba * args->dsize;
 				if (pwrite(bb->fd, buff, args->dsize, off) !=
-				    (ssize_t)args->dsize) {
+				    static_cast<ssize_t>(args->dsize)) {
 					perror("pwrite");
 					ret = -1;
 					goto out;
@@ -181,8 +181,8 @@ blk_do_warmup(struct blk_bench *bb, struct benchmark_args *args)
 				break;
 			case OP_TYPE_MEMCPY: {
 				size_t off = lba * args->dsize;
-				pmem_memcpy_persist((char *)bb->addr + off,
-						    buff, args->dsize);
+				pmem_memcpy_persist(bb->addr + off, buff,
+						    args->dsize);
 			} break;
 			default:
 				perror("unknown type");
@@ -219,7 +219,7 @@ fileio_read(struct blk_bench *bb, struct benchmark_args *ba,
 {
 	os_off_t file_off = off * ba->dsize;
 	if (pread(bb->fd, bworker->buff, ba->dsize, file_off) !=
-	    (ssize_t)ba->dsize) {
+	    static_cast<ssize_t>(ba->dsize)) {
 		perror("pread");
 		return -1;
 	}
@@ -234,7 +234,7 @@ memcpy_read(struct blk_bench *bb, struct benchmark_args *ba,
 	    struct blk_worker *bworker, os_off_t off)
 {
 	os_off_t file_off = off * ba->dsize;
-	memcpy(bworker->buff, (char *)bb->addr + file_off, ba->dsize);
+	memcpy(bworker->buff, bb->addr + file_off, ba->dsize);
 	return 0;
 }
 
@@ -260,8 +260,7 @@ memcpy_write(struct blk_bench *bb, struct benchmark_args *ba,
 	     struct blk_worker *bworker, os_off_t off)
 {
 	os_off_t file_off = off * ba->dsize;
-	pmem_memcpy_persist((char *)bb->addr + file_off, bworker->buff,
-			    ba->dsize);
+	pmem_memcpy_persist(bb->addr + file_off, bworker->buff, ba->dsize);
 	return 0;
 }
 
@@ -274,7 +273,7 @@ fileio_write(struct blk_bench *bb, struct benchmark_args *ba,
 {
 	os_off_t file_off = off * ba->dsize;
 	if (pwrite(bb->fd, bworker->buff, ba->dsize, file_off) !=
-	    (ssize_t)ba->dsize) {
+	    static_cast<ssize_t>(ba->dsize)) {
 		perror("pwrite");
 		return -1;
 	}
@@ -287,8 +286,8 @@ fileio_write(struct blk_bench *bb, struct benchmark_args *ba,
 static int
 blk_operation(struct benchmark *bench, struct operation_info *info)
 {
-	auto *bb = (struct blk_bench *)pmembench_get_priv(bench);
-	auto *bworker = (struct blk_worker *)info->worker->priv;
+	auto *bb = static_cast<struct blk_bench *>(pmembench_get_priv(bench));
+	auto *bworker = static_cast<struct blk_worker *>(info->worker->priv);
 
 	os_off_t off = bworker->blocks[info->index];
 	return bb->worker(bb, info->args, bworker, off);
@@ -302,19 +301,19 @@ blk_init_worker(struct benchmark *bench, struct benchmark_args *args,
 		struct worker_info *worker)
 {
 	struct blk_worker *bworker =
-		(struct blk_worker *)malloc(sizeof(*bworker));
+		static_cast<struct blk_worker *>(malloc(sizeof(*bworker)));
 
 	if (!bworker) {
 		perror("malloc");
 		return -1;
 	}
 
-	auto *bb = (struct blk_bench *)pmembench_get_priv(bench);
-	auto *bargs = (struct blk_args *)args->opts;
+	auto *bb = static_cast<struct blk_bench *>(pmembench_get_priv(bench));
+	auto *bargs = static_cast<struct blk_args *>(args->opts);
 
 	bworker->seed = os_rand_r(&bargs->seed);
 
-	bworker->buff = (char *)malloc(args->dsize);
+	bworker->buff = static_cast<char *>(malloc(args->dsize));
 	if (!bworker->buff) {
 		perror("malloc");
 		goto err_buff;
@@ -324,8 +323,8 @@ blk_init_worker(struct benchmark *bench, struct benchmark_args *args,
 	memset(bworker->buff, bworker->seed, args->dsize);
 
 	assert(args->n_ops_per_thread != 0);
-	bworker->blocks = (os_off_t *)malloc(sizeof(*bworker->blocks) *
-					     args->n_ops_per_thread);
+	bworker->blocks = static_cast<os_off_t *>(
+		malloc(sizeof(*bworker->blocks) * args->n_ops_per_thread));
 	if (!bworker->blocks) {
 		perror("malloc");
 		goto err_blocks;
@@ -370,7 +369,7 @@ static void
 blk_free_worker(struct benchmark *bench, struct benchmark_args *args,
 		struct worker_info *worker)
 {
-	auto *bworker = (struct blk_worker *)worker->priv;
+	auto *bworker = static_cast<struct blk_worker *>(worker->priv);
 	free(bworker->blocks);
 	free(bworker->buff);
 	free(bworker);
@@ -382,7 +381,7 @@ blk_free_worker(struct benchmark *bench, struct benchmark_args *args,
 static int
 blk_init(struct blk_bench *bb, struct benchmark_args *args)
 {
-	auto *ba = (struct blk_args *)args->opts;
+	auto *ba = static_cast<struct blk_args *>(args->opts);
 	assert(ba != nullptr);
 
 	bb->type = parse_op_type(ba->type_str);
@@ -467,7 +466,7 @@ blk_init(struct blk_bench *bb, struct benchmark_args *args)
 		}
 	} else if (bb->type == OP_TYPE_MEMCPY) {
 		/* skip pool header, so addr points to the first block */
-		bb->addr = (char *)bb->pbp + 8192;
+		bb->addr = reinterpret_cast<char *>(bb->pbp) + 8192;
 	}
 
 	bb->blocks_per_thread = bb->nblocks / args->n_threads;
@@ -496,7 +495,8 @@ blk_read_init(struct benchmark *bench, struct benchmark_args *args)
 	assert(args != nullptr);
 
 	int ret;
-	auto *bb = (struct blk_bench *)malloc(sizeof(struct blk_bench));
+	auto *bb = static_cast<struct blk_bench *>(
+		malloc(sizeof(struct blk_bench)));
 	if (bb == nullptr) {
 		perror("malloc");
 		return -1;
@@ -538,7 +538,8 @@ blk_write_init(struct benchmark *bench, struct benchmark_args *args)
 	assert(args != nullptr);
 
 	int ret;
-	auto *bb = (struct blk_bench *)malloc(sizeof(struct blk_bench));
+	auto *bb = static_cast<struct blk_bench *>(
+		malloc(sizeof(struct blk_bench)));
 	if (bb == nullptr) {
 		perror("malloc");
 		return -1;
@@ -576,7 +577,7 @@ blk_write_init(struct benchmark *bench, struct benchmark_args *args)
 static int
 blk_exit(struct benchmark *bench, struct benchmark_args *args)
 {
-	auto *bb = (struct blk_bench *)pmembench_get_priv(bench);
+	auto *bb = static_cast<struct blk_bench *>(pmembench_get_priv(bench));
 
 	int result;
 	switch (bb->type) {

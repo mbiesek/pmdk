@@ -44,7 +44,8 @@
 struct clo_vec *
 clo_vec_alloc(size_t size)
 {
-	struct clo_vec *clovec = (struct clo_vec *)malloc(sizeof(*clovec));
+	struct clo_vec *clovec =
+		static_cast<struct clo_vec *>(malloc(sizeof(*clovec)));
 	assert(clovec != nullptr);
 
 	/* init list of arguments and allocations */
@@ -58,7 +59,7 @@ clo_vec_alloc(size_t size)
 
 	/* add first struct to list */
 	struct clo_vec_args *args =
-		(struct clo_vec_args *)malloc(sizeof(*args));
+		static_cast<struct clo_vec_args *>(malloc(sizeof(*args)));
 
 	assert(args != nullptr);
 
@@ -126,7 +127,7 @@ int
 clo_vec_add_alloc(struct clo_vec *clovec, void *ptr)
 {
 	struct clo_vec_alloc *alloc =
-		(struct clo_vec_alloc *)malloc(sizeof(*alloc));
+		static_cast<struct clo_vec_alloc *>(malloc(sizeof(*alloc)));
 
 	assert(alloc != nullptr);
 
@@ -146,8 +147,8 @@ clo_vec_grow(struct clo_vec *clovec, size_t new_len)
 	size_t i;
 
 	for (i = 0; i < nargs; i++) {
-		struct clo_vec_args *args =
-			(struct clo_vec_args *)calloc(1, sizeof(*args));
+		struct clo_vec_args *args = static_cast<struct clo_vec_args *>(
+			calloc(1, sizeof(*args)));
 
 		assert(args != nullptr);
 
@@ -172,7 +173,7 @@ struct clo_vec_vlist *
 clo_vec_vlist_alloc(void)
 {
 	struct clo_vec_vlist *list =
-		(struct clo_vec_vlist *)malloc(sizeof(*list));
+		static_cast<struct clo_vec_vlist *>(malloc(sizeof(*list)));
 
 	assert(list != nullptr);
 
@@ -207,7 +208,7 @@ void
 clo_vec_vlist_add(struct clo_vec_vlist *list, void *ptr, size_t size)
 {
 	struct clo_vec_value *val =
-		(struct clo_vec_value *)malloc(sizeof(*val));
+		static_cast<struct clo_vec_value *>(malloc(sizeof(*val)));
 	assert(val != nullptr);
 
 	val->ptr = malloc(size);
@@ -234,7 +235,7 @@ clo_vec_memcpy(struct clo_vec *clovec, size_t off, size_t size, void *ptr)
 
 	size_t i;
 	for (i = 0; i < clovec->nargs; i++) {
-		auto *args = (char *)clo_vec_get_args(clovec, i);
+		auto *args = static_cast<char *>(clo_vec_get_args(clovec, i));
 		char *dptr = args + off;
 		memcpy(dptr, ptr, size);
 	}
@@ -268,7 +269,8 @@ clo_vec_memcpy_list(struct clo_vec *clovec, size_t off, size_t size,
 	TAILQ_FOREACH(value, &list->head, next)
 	{
 		for (i = value_i * len; i < (value_i + 1) * len; i++) {
-			auto *args = (char *)clo_vec_get_args(clovec, i);
+			auto *args = static_cast<char *>(
+				clo_vec_get_args(clovec, i));
 			char *dptr = args + off;
 			memcpy(dptr, value->ptr, size);
 		}

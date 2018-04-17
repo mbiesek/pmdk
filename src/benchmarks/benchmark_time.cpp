@@ -70,7 +70,8 @@ benchmark_time_diff(benchmark_time_t *d, benchmark_time_t *t1,
 double
 benchmark_time_get_secs(benchmark_time_t *t)
 {
-	return (double)t->tv_sec + (double)t->tv_nsec / NSECPSEC;
+	return static_cast<double>(t->tv_sec) +
+		static_cast<double>(t->tv_nsec) / NSECPSEC;
 }
 
 /*
@@ -93,9 +94,11 @@ int
 benchmark_time_compare(const benchmark_time_t *t1, const benchmark_time_t *t2)
 {
 	if (t1->tv_sec == t2->tv_sec)
-		return (int)((long long)t1->tv_nsec - (long long)t2->tv_nsec);
+		return static_cast<int>(static_cast<long long>(t1->tv_nsec) -
+					static_cast<long long>(t2->tv_nsec));
 	else
-		return (int)((long long)t1->tv_sec - (long long)t2->tv_sec);
+		return static_cast<int>(static_cast<long long>(t1->tv_sec) -
+					static_cast<long long>(t2->tv_sec));
 }
 
 /*

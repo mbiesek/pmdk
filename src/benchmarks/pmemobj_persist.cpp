@@ -94,13 +94,14 @@ static int
 init_objects(struct obj_bench *ob)
 {
 	assert(ob->nobjs != 0);
-	ob->oids = (PMEMoid *)malloc(ob->nobjs * sizeof(*ob->oids));
+	ob->oids =
+		static_cast<PMEMoid *>(malloc(ob->nobjs * sizeof(*ob->oids)));
 	if (!ob->oids) {
 		perror("malloc");
 		return -1;
 	}
 
-	ob->ptrs = (void **)malloc(ob->nobjs * sizeof(*ob->ptrs));
+	ob->ptrs = static_cast<void **>(malloc(ob->nobjs * sizeof(*ob->ptrs)));
 	if (!ob->ptrs) {
 		perror("malloc");
 		goto err_malloc;
@@ -150,7 +151,7 @@ do_warmup(struct obj_bench *ob)
 static int
 obj_persist_op(struct benchmark *bench, struct operation_info *info)
 {
-	auto *ob = (struct obj_bench *)pmembench_get_priv(bench);
+	auto *ob = static_cast<struct obj_bench *>(pmembench_get_priv(bench));
 	uint64_t idx = info->worker->index * info->args->n_ops_per_thread +
 		info->index;
 
@@ -173,14 +174,15 @@ obj_persist_init(struct benchmark *bench, struct benchmark_args *args)
 	assert(args != nullptr);
 	assert(args->opts != nullptr);
 
-	auto *pa = (struct prog_args *)args->opts;
+	auto *pa = static_cast<struct prog_args *>(args->opts);
 	size_t poolsize;
 	if (pa->minsize >= args->dsize) {
 		fprintf(stderr, "Wrong params - allocation size\n");
 		return -1;
 	}
 
-	auto *ob = (struct obj_bench *)malloc(sizeof(struct obj_bench));
+	auto *ob = static_cast<struct obj_bench *>(
+		malloc(sizeof(struct obj_bench)));
 	if (ob == nullptr) {
 		perror("malloc");
 		return -1;
@@ -246,7 +248,7 @@ free_ob:
 static int
 obj_persist_exit(struct benchmark *bench, struct benchmark_args *args)
 {
-	auto *ob = (struct obj_bench *)pmembench_get_priv(bench);
+	auto *ob = static_cast<struct obj_bench *>(pmembench_get_priv(bench));
 
 	for (uint64_t i = 0; i < ob->nobjs; ++i) {
 		pmemobj_free(&ob->oids[i]);

@@ -239,7 +239,7 @@ parse_type_mode(const char *arg)
 {
 	enum type_mode i = TYPE_MODE_ONE;
 	for (; i < MAX_TYPE_MODE && strcmp(arg, type_mode_names[i]) != 0;
-	     i = (enum type_mode)(i + 1))
+	     i = static_cast<enum type_mode>(i + 1))
 		;
 	return i;
 }
@@ -252,7 +252,8 @@ static size_t *
 rand_sizes(size_t min, size_t max, size_t n_ops)
 {
 	assert(n_ops != 0);
-	auto *rand_sizes = (size_t *)malloc(n_ops * sizeof(size_t));
+	auto *rand_sizes =
+		static_cast<size_t *>(malloc(n_ops * sizeof(size_t)));
 	if (rand_sizes == nullptr) {
 		perror("malloc");
 		return nullptr;
@@ -271,8 +272,8 @@ static int
 random_types(struct pobj_bench *bench_priv, struct benchmark_args *args)
 {
 	assert(bench_priv->args_priv->n_objs != 0);
-	bench_priv->random_types = (size_t *)malloc(
-		bench_priv->args_priv->n_objs * sizeof(size_t));
+	bench_priv->random_types = static_cast<size_t *>(
+		malloc(bench_priv->args_priv->n_objs * sizeof(size_t)));
 	if (bench_priv->random_types == nullptr) {
 		perror("malloc");
 		return -1;
@@ -296,15 +297,15 @@ pobj_init(struct benchmark *bench, struct benchmark_args *args)
 	assert(bench != nullptr);
 	assert(args != nullptr);
 
-	auto *bench_priv =
-		(struct pobj_bench *)malloc(sizeof(struct pobj_bench));
+	auto *bench_priv = static_cast<struct pobj_bench *>(
+		malloc(sizeof(struct pobj_bench)));
 	if (bench_priv == nullptr) {
 		perror("malloc");
 		return -1;
 	}
 	assert(args->opts != nullptr);
 
-	bench_priv->args_priv = (struct pobj_args *)args->opts;
+	bench_priv->args_priv = static_cast<struct pobj_args *>(args->opts);
 	bench_priv->args_priv->obj_size = args->dsize;
 	bench_priv->args_priv->range =
 		bench_priv->args_priv->min_size > 0 ? true : false;
@@ -366,15 +367,15 @@ pobj_init(struct benchmark *bench, struct benchmark_args *args)
 	}
 
 	assert(bench_priv->n_pools > 0);
-	bench_priv->pop = (PMEMobjpool **)calloc(bench_priv->n_pools,
-						 sizeof(PMEMobjpool *));
+	bench_priv->pop = static_cast<PMEMobjpool **>(
+		calloc(bench_priv->n_pools, sizeof(PMEMobjpool *)));
 	if (bench_priv->pop == nullptr) {
 		perror("calloc");
 		goto free_random_sizes;
 	}
 
-	bench_priv->sets = (const char **)calloc(bench_priv->n_pools,
-						 sizeof(const char *));
+	bench_priv->sets = static_cast<const char **>(
+		calloc(bench_priv->n_pools, sizeof(const char *)));
 	if (bench_priv->sets == nullptr) {
 		perror("calloc");
 		goto free_pop;
@@ -388,16 +389,17 @@ pobj_init(struct benchmark *bench, struct benchmark_args *args)
 		size_t path_len = (strlen(PART_NAME) + strlen(args->fname)) +
 			MAX_DIGITS + 1;
 		for (i = 0; i < bench_priv->n_pools; i++) {
-			bench_priv->sets[i] =
-				(char *)malloc(path_len * sizeof(char));
+			bench_priv->sets[i] = static_cast<char *>(
+				malloc(path_len * sizeof(char)));
 			if (bench_priv->sets[i] == nullptr) {
 				perror("malloc");
 				goto free_sets;
 			}
-			int ret =
-				snprintf((char *)bench_priv->sets[i], path_len,
-					 "%s%s%02x", args->fname, PART_NAME, i);
-			if (ret < 0 || ret >= (int)path_len) {
+			int ret = snprintf(
+				const_cast<char *>(bench_priv->sets[i]),
+				path_len, "%s%s%02x", args->fname, PART_NAME,
+				i);
+			if (ret < 0 || ret >= static_cast<int>(path_len)) {
 				perror("snprintf");
 				goto free_sets;
 			}
@@ -431,7 +433,7 @@ pobj_init(struct benchmark *bench, struct benchmark_args *args)
 free_sets:
 	for (; i > 0; i--) {
 		pmemobj_close(bench_priv->pop[i - 1]);
-		free((char *)bench_priv->sets[i - 1]);
+		free(const_cast<char *>(bench_priv->sets[i - 1]));
 	}
 free_pools:
 	free(bench_priv->sets);
@@ -453,7 +455,7 @@ free_bench_priv:
 static int
 pobj_direct_init(struct benchmark *bench, struct benchmark_args *args)
 {
-	auto *pa = (struct pobj_args *)args->opts;
+	auto *pa = static_cast<struct pobj_args *>(args->opts);
 	pa->n_objs = pa->one_obj ? 1 : args->n_ops_per_thread;
 	if (pobj_init(bench, args) != 0)
 		return -1;
@@ -467,11 +469,12 @@ static int
 pobj_exit(struct benchmark *bench, struct benchmark_args *args)
 {
 	size_t i;
-	auto *bench_priv = (struct pobj_bench *)pmembench_get_priv(bench);
+	auto *bench_priv =
+		static_cast<struct pobj_bench *>(pmembench_get_priv(bench));
 	if (bench_priv->n_pools > 1) {
 		for (i = 0; i < bench_priv->n_pools; i++) {
 			pmemobj_close(bench_priv->pop[i]);
-			free((char *)bench_priv->sets[i]);
+			free(const_cast<char *>(bench_priv->sets[i]));
 		}
 	} else {
 		pmemobj_close(bench_priv->pop[0]);
@@ -492,16 +495,18 @@ pobj_init_worker(struct benchmark *bench, struct benchmark_args *args,
 		 struct worker_info *worker)
 {
 	size_t i, idx = worker->index;
-	auto *bench_priv = (struct pobj_bench *)pmembench_get_priv(bench);
-	auto *pw = (struct pobj_worker *)calloc(1, sizeof(struct pobj_worker));
+	auto *bench_priv =
+		static_cast<struct pobj_bench *>(pmembench_get_priv(bench));
+	auto *pw = static_cast<struct pobj_worker *>(
+		calloc(1, sizeof(struct pobj_worker)));
 	if (pw == nullptr) {
 		perror("calloc");
 		return -1;
 	}
 
 	worker->priv = pw;
-	pw->oids = (PMEMoid *)calloc(bench_priv->args_priv->n_objs,
-				     sizeof(PMEMoid));
+	pw->oids = static_cast<PMEMoid *>(
+		calloc(bench_priv->args_priv->n_objs, sizeof(PMEMoid)));
 	if (pw->oids == nullptr) {
 		free(pw);
 		perror("calloc");
@@ -533,8 +538,9 @@ out:
 static int
 pobj_direct_op(struct benchmark *bench, struct operation_info *info)
 {
-	auto *bench_priv = (struct pobj_bench *)pmembench_get_priv(bench);
-	auto *pw = (struct pobj_worker *)info->worker->priv;
+	auto *bench_priv =
+		static_cast<struct pobj_bench *>(pmembench_get_priv(bench));
+	auto *pw = static_cast<struct pobj_worker *>(info->worker->priv);
 	size_t idx = bench_priv->obj(info->index);
 	if (pmemobj_direct(pw->oids[idx]) == nullptr)
 		return -1;
@@ -547,7 +553,8 @@ pobj_direct_op(struct benchmark *bench, struct operation_info *info)
 static int
 pobj_open_op(struct benchmark *bench, struct operation_info *info)
 {
-	auto *bench_priv = (struct pobj_bench *)pmembench_get_priv(bench);
+	auto *bench_priv =
+		static_cast<struct pobj_bench *>(pmembench_get_priv(bench));
 	size_t idx = bench_priv->pool(info->worker->index);
 	pmemobj_close(bench_priv->pop[idx]);
 	bench_priv->pop[idx] = pmemobj_open(bench_priv->sets[idx], LAYOUT_NAME);
@@ -563,8 +570,9 @@ static void
 pobj_free_worker(struct benchmark *bench, struct benchmark_args *args,
 		 struct worker_info *worker)
 {
-	auto *pw = (struct pobj_worker *)worker->priv;
-	auto *bench_priv = (struct pobj_bench *)pmembench_get_priv(bench);
+	auto *pw = static_cast<struct pobj_worker *>(worker->priv);
+	auto *bench_priv =
+		static_cast<struct pobj_bench *>(pmembench_get_priv(bench));
 	for (size_t i = 0; i < bench_priv->args_priv->n_objs; i++)
 		pmemobj_free(&pw->oids[i]);
 	free(pw->oids);

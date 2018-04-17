@@ -45,7 +45,7 @@
 struct kv *
 kv_alloc(const char *key, const char *value)
 {
-	struct kv *kv = (struct kv *)malloc(sizeof(*kv));
+	struct kv *kv = static_cast<struct kv *>(malloc(sizeof(*kv)));
 	assert(kv != nullptr);
 
 	kv->key = strdup(key);
@@ -75,7 +75,7 @@ kv_free(struct kv *kv)
 struct scenario *
 scenario_alloc(const char *name, const char *bench)
 {
-	struct scenario *s = (struct scenario *)malloc(sizeof(*s));
+	struct scenario *s = static_cast<struct scenario *>(malloc(sizeof(*s)));
 	assert(s != nullptr);
 
 	TAILQ_INIT(&s->head);
@@ -127,7 +127,7 @@ struct scenarios *
 scenarios_alloc(void)
 {
 	struct scenarios *scenarios =
-		(struct scenarios *)malloc(sizeof(*scenarios));
+		static_cast<struct scenarios *>(malloc(sizeof(*scenarios)));
 	assert(nullptr != scenarios);
 
 	TAILQ_INIT(&scenarios->head);

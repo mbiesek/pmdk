@@ -59,7 +59,8 @@ struct config_reader {
 struct config_reader *
 config_reader_alloc(void)
 {
-	struct config_reader *cr = (struct config_reader *)malloc(sizeof(*cr));
+	struct config_reader *cr =
+		static_cast<struct config_reader *>(malloc(sizeof(*cr)));
 	assert(cr != nullptr);
 
 	cr->key_file = g_key_file_new();
