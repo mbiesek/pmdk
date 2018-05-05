@@ -296,6 +296,8 @@ struct operation_info {
  * allow_poolset: Indicates whether benchmark may use poolset files.
  *                If set to false and fname points to a poolset, an error
  *                will be returned.
+ * print_bandwidth: Indicates whether benchmark should printing information
+ *                about bandwidth.
  * According to multithread and single_operation flags it may be
  * invoked in different ways:
  *  +-------------+----------+-------------------------------------+
