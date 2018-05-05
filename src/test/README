@@ -60,7 +60,7 @@ file system type, and build type to test.
 RUNTESTS takes options to limit what it runs.  The usage is:
 
  RUNTESTS [ -hnv ] [ -b build-type ] [ -t test-type ] [ -f fs-type ]
-	    [ -o timeout ] [ -s test-file ] [ -k skip-dir ]
+	    [ -o timeout ] [ -s test-file | -u test-sequence ] [ -k skip-dir ]
 	    [ -m memcheck ] [-p pmemcheck ] [ -e helgrind ] [ -d drd ] [ -c ]
 	    [ -q provider ] [ -r persistency-method ]
 	    [tests...]
@@ -74,6 +74,8 @@ RUNTESTS takes options to limit what it runs.  The usage is:
 		 Default value is 3 minutes.
  Test file is: a name of the particular test script (test case).
 		 all (default), TEST0, TEST1, ...
+ Test sequence is: a series of test scripts (test cases) specified by numbers.
+		 for example: 0-2,5 will execute TEST0, TEST1, TEST2 and TEST5
  Memcheck, helgrind, drd and pmemcheck modes are:
 		 auto (default, enable/disable based on test requirements),
 		 force-enable (enable when test does not require given valgrind tool,
