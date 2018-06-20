@@ -189,14 +189,10 @@ enum clo_type {
  * This structure is used to declare command line options by the benchmark
  * which will be automatically parsed by the framework.
  *
- * opt_short	: Short option char. If there is no short option write 0.
  * opt_long	: Long option string.
  * descr	: Description of command line option.
- * off		: Offset in data structure in which the value should be stored.
- * type		: Type of command line option.
  * def		: Default value. If set to NULL, this options is required.
- * ignore_in_res: Do not print in results.
- * check	: Optional callback for checking the command line option value.
+ * off		: Offset in data structure in which the value should be stored.
  * type_int	: Parameters for signed integer.
  * type_uint	: Parameters for unsigned integer.
  * type_str	: Parameters for string.
@@ -217,15 +213,16 @@ enum clo_type {
  *                execution. Otherwise benchmark must provide valid pointer in
  *                opt_var and max_size parameter must be set properly.
  * max_size	: Maximum size of string.
+ * used : Indicates if command line option was used
+ * opt_short	: Short option char. If there is no short option write 0.
+ * type		: Type of command line option.
+ * ignore_in_res: Do not print in results.
  */
 struct benchmark_clo {
-	int opt_short;
 	const char *opt_long;
-	enum clo_type type;
 	const char *descr;
-	size_t off;
 	const char *def;
-	bool ignore_in_res;
+	size_t off;
 	struct {
 		size_t size;
 		int base;
@@ -238,7 +235,10 @@ struct benchmark_clo {
 		uint64_t min;
 		uint64_t max;
 	} type_uint;
+	int opt_short;
 	int used;
+	enum clo_type type;
+	bool ignore_in_res;
 };
 
 #define clo_field_offset(s, f) ((size_t) & ((s *)0)->f)
